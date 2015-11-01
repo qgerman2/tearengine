@@ -23,6 +23,7 @@ require("src.terrain")
 require("src.chunk")
 require("src.level")
 require("src.input")
+require("src.hud")
 
 require("src.event_manager")
 require("src.snapshot")
@@ -32,6 +33,7 @@ require("src.unit")
 require("src.unit_animator")
 
 require("src.weapon")
+require("src.projectile")
 require("src.bazooka")
 
 function love.load()

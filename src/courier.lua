@@ -15,6 +15,8 @@ MSG = {							--Reliable
 	SyncEntityPosition	= "13", --deprecated
 	SyncEntityRemove	= "14", --*
 	SyncTickPredict		= "15",
+	ProjectileFire		= "16", --*
+	UnitHealth			= "17",
 }
 
 local MessageType = {
@@ -105,7 +107,8 @@ local MessageType = {
 		"kind",
 		"x",
 		"y",
-		"b2",
+		"vx",
+		"vy",
 		reliable = true,
 	},
 	["13"] = {			--Generic entity sync			(Server)
@@ -122,6 +125,21 @@ local MessageType = {
 	["15"] = {
 		"tick",
 	},
+	["16"] = {
+		"tick",
+		"peerID",
+		"entityID",
+		"kind",
+		"x",
+		"y",
+		"vx",
+		"vy",
+		reliable = true,
+	},
+	["17"] = {
+		"entityID",
+		"health",
+	}
 }
 
 Courier = class("Courier")

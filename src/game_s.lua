@@ -65,15 +65,30 @@ function GameServer:processMessage(msg, peer)
 end
 
 function GameServer:syncEntityCreation(entity, id)
-	self:broadcastMessage({
-		[0] = MSG.SyncEntityCreate,
-		[1] = self._tick,
-		[2] = id,
-		[3] = entity.kind,
-		[4] = entity.x,
-		[5] = entity.y,
-		[6] = entity.b2World and "1" or "0",
-	})
+	if entity.kind == "Box" then
+		self:broadcastMessage({
+			[0] = MSG.ProjectileFire,
+			[1] = self._tick,
+			[2] = entity.owner.peerID,
+			[3] = id,
+			[4] = entity.kind,
+			[5] = entity.x,
+			[6] = entity.y,
+			[7] = entity.vx,
+			[8] = entity.vy,
+		})
+	else
+		self:broadcastMessage({
+			[0] = MSG.SyncEntityCreate,
+			[1] = self._tick,
+			[2] = id,
+			[3] = entity.kind,
+			[4] = entity.x,
+			[5] = entity.y,
+			[6] = entity.vx,
+			[7] = entity.vy,
+		})
+	end
 end
 
 function GameServer:syncEntityRemoval(entity, id)
@@ -147,22 +162,35 @@ function GameServer:sendLevelSnapshot()
 						end
 					end
 				elseif entity.kind == "Box" then
+					local x, y = entity:getPosition()
+					local r = entity:getAngle()
+					local vx, vy = entity:getLinearVelocity()
+					local vr = entity:getAngularVelocity()
 					if entity.b2Body:isAwake() then
-						local x, y = entity:getPosition()
-						local r = entity:getAngle()
-						local vx, vy = entity:getLinearVelocity()
-						local vr = entity:getAngularVelocity()
-						destPeer.Courier:addMessage({
-							[0] = MSG.SyncEntityPredict,
-							[1] = entityID,
-							--[2] = self._tick,
-							[2] = x,
-							[3] = y,
-							[4] = r,
-							[5] = vx,
-							[6] = vy,
-							[7] = vr,
-						})
+						if entity.owner.peerID == destPeerID then
+							destPeer.Courier:addMessage({
+								[0] = MSG.SyncEntity,
+								[1] = entityID,
+								[2] = self._tick,
+								[3] = x,
+								[4] = y,
+								[5] = r,
+								[6] = vx,
+								[7] = vy,
+								[8] = vr,
+							})
+						else
+							destPeer.Courier:addMessage({
+								[0] = MSG.SyncEntityPredict,
+								[1] = entityID,
+								[2] = x,
+								[3] = y,
+								[4] = r,
+								[5] = vx,
+								[6] = vy,
+								[7] = vr,
+							})
+						end
 					end
 				end
 			end

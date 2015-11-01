@@ -1,6 +1,3 @@
---Clase "UnitAnimator"
---Animaciones para las unidades!
-
 UnitAnimator = class("UnitAnimator")
 
 function UnitAnimator:initialize(unit)

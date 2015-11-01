@@ -9,7 +9,10 @@ end
 function Bazooka:fire(angle)
 	if server then
 		local x, y = self.owner:getPosition()
-		local rocket = Box(x, y - 100, self.owner.b2World)
+		local vx, vy = utils.speedVector(25, angle)
+		local rocket = Box(x + vx, y + vy, self.owner.b2World)
+		rocket:setLinearVelocity(vx * 25, vy * 25)
+		rocket.owner = self.owner
 		self.owner.Level:addEntity(rocket)
 	end
 end

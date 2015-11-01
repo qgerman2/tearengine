@@ -9,6 +9,13 @@ function EventManager:initialize(gameClient)
 	self.skipTick = 0
 
 	self.Events = {}
+
+	self.EventPriority = {
+		["EntityDestruction"] = 1,
+		["EntityCreation"] = 2,
+		["EntityUpdate"] = 3,
+		["PlayerInput"] = 4
+	}
 end
 
 function EventManager:setServerTick(tick)
@@ -26,8 +33,9 @@ function EventManager:event(eventData)
 	elseif type == 11 then newEvent = self:EntityUpdate(eventData)
 	elseif type == 12 then newEvent = self:EntityCreation(eventData)
 	elseif type == 13 then newEvent = self:EntityUpdate(eventData)
-	elseif type == 14 then newEvent = self:EntityDestruction(eventData) end
+	elseif type == 14 then newEvent = self:EntityDestruction(eventData)
 	--elseif type == 15 then newEvent = self:TerrainDeformation(eventData) end
+	elseif type == 16 then newEvent = self:ProjectileFire(eventData) end
 	--Add it if necessary
 	if newEvent then
 		table.insert(self.Events, 1, newEvent)
@@ -96,15 +104,16 @@ function EventManager:EntityCreation(eventData)
 	local event = {
 		type = "EntityCreation",
 		tick = tonumber(eventData.tick),
+		kind = eventData.kind,
 		id = tonumber(eventData.entityID),
 		x = tonumber(eventData.x),
 		y = tonumber(eventData.y),
+		vx = eventData.vx,
+		vy = eventData.vy
 	}
 	if event.tick <= self.displayTick then
 		event.tick = self.displayTick + 1
 	end
-	local b2World = eventData.b2 == "1" and self.GameClient.Level.b2World or false
-	event.entity = _G[eventData.kind](event.x, event.y, b2World)
 	return event
 end
 
@@ -136,8 +145,63 @@ function EventManager:TerrainDeformation(eventData)
 	return event
 end
 
+function EventManager:ProjectileFire(eventData)
+	if eventData.peerID == self.GameClient._peerID then
+		return self:EntityCreation(eventData)
+	end
+	--[[local event = {
+		type = "ProjectileFire",
+		tick = tonumber(eventData.tick),
+		kind = eventData.kind,
+		id = tonumber(eventData.entityID),
+		x = tonumber(eventData.x),
+		y = tonumber(eventData.y),
+		vx = eventData.vx,
+		vy = eventData.vy
+	}]]--
+	local game = self.GameClient
+	local tick = game._syncInputTick
+	local temp = false
+	for i = 1, #game.journal do
+		local snapshotA = game.journal[i]
+		if snapshotA.tick + 1 == tick then
+			snapshotA:apply(game.Level)
+			game.Level:update(0)
+			snapshotA:apply(game.Level)
+			game.Level:update(game.tickRate)
+			local b2World = game.Level.b2World
+			local entity = _G[eventData.kind](eventData.x, eventData.y, b2World)
+			temp = entity
+			entity.b2Body:setLinearVelocity(eventData.vx, eventData.vy)
+			entity.persist = true
+			game.Level:addEntity(entity, eventData.id)
+			for ii = i - 1, 1, -1 do
+				local snapshotB = game.journal[ii]
+				snapshotB:apply(game.Level)
+				game._tick = snapshotB.tick
+				game.journal[ii] = Snapshot(game.Level)
+				if ii ~= 1 then
+					game.Level:update(game.tickRate)
+				end
+			end
+		end
+	end
+	if temp then temp.persist = false end
+	game._tick = game._tick + 1
+end
+
 function EventManager:getDisplayTick()
 	return self.displayTick
+end
+
+function EventManager:sortEvents()
+	table.sort(self.Events,
+		function(a, b)
+			if a and b then
+				return self.EventPriority[a.type] < self.EventPriority[b.type]
+			end
+		end
+	)
 end
 
 function EventManager:calculateDelay()
@@ -160,16 +224,22 @@ function EventManager:update()
 	if self.skipTick > 0 then self.skipTick = self.skipTick - 1; return end
 	self.displayTick = self.displayTick + 1
 	local level = self.GameClient.Level
+	self:sortEvents()
 	for i, event in pairs(self.Events) do
 		if event.tick == self.displayTick then
 			if event.type == "EntityUpdate" then
 				local entity = level.Entities[event.entityID]
-				entity:setPosition(event.x, event.y)
-				entity:setAngle(event.r)
-				entity:setLinearVelocity(event.vx, event.vy)
-				entity:setAngularVelocity(event.vr)
+				if entity then
+					entity:setPosition(event.x, event.y)
+					entity:setAngle(event.r)
+					entity:setLinearVelocity(event.vx, event.vy)
+					entity:setAngularVelocity(event.vr)
+				end
 			elseif event.type == "EntityCreation" then
-				level:addEntity(event.entity, event.id)
+				local b2World = self.GameClient.Level.b2World
+				local entity = _G[event.kind](event.x, event.y, b2World)
+				entity.b2Body:setLinearVelocity(event.vx, event.vy)
+				level:addEntity(entity, event.id)
 			elseif event.type == "EntityDestruction" then
 				level:removeEntity(event.id)
 			elseif event.type == "TerrainDeformation" then

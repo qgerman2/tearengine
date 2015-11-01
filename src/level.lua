@@ -12,7 +12,7 @@ function Level:initialize(game, mapFile)
 	self.TerrainDeformations = {}
 end
 
-function Level:addEntity(entity, id)
+function Level:addEntity(entity, id, source)
 	if not id then
 		entity.id = #self.Entities + 1
 	else
@@ -22,7 +22,7 @@ function Level:addEntity(entity, id)
 	entity.active = true
 	self.Entities[entity.id] = entity
 	if server and entity.shared then
-		self.Game:syncEntityCreation(entity, entity.id)
+		self.Game:syncEntityCreation(entity, entity.id, source)
 	end
 	return entity.id
 end
@@ -120,6 +120,14 @@ function Level:update(t)
 	for i, entity in pairs(self.Entities) do
 		if entity then
 			entity:e_update(t)
+			if entity.updateHealth then
+				self.Game:broadcastMessage({
+					[0] = MSG.UnitHealth,
+					[1] = entity.id,
+					[2] = entity.health,
+				})
+				entity.updateHealth = false
+			end
 		end
 	end
 	self:parseTerrainDeformations()

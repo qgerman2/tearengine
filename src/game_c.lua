@@ -23,6 +23,8 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 
 	self._sync = false
 	self._syncInputTick = 0
+
+	self.HUD = HUD(self)
 end
 
 function GameClient:preTick(t)
@@ -74,7 +76,8 @@ function GameClient:processMessage(msg)
 	if type == 09 then self:setServerTick(msg)
 	elseif type == 10 then self:checkEntitySync(msg)
 	elseif type == 15 then self:setPredictTick(msg)
-	elseif type == 08 or type >= 11 and type <= 14 then
+	elseif type == 17 then self:updateUnitHealth(msg)
+	elseif type == 08 or type == 16 or type >= 11 and type <= 14 then
 		self.EventManager:event(msg)
 	end
 end
@@ -140,10 +143,15 @@ function GameClient:fixEntitySync(tick)
 	self._tick = self._tick + 1
 end
 
-function GameClient:update(dt)
+function GameClient:updateUnitHealth(msg)
+	local unit = self.Level.Entities[msg.entityID]
+	unit.health = msg.health
+end
 
+function GameClient:update(dt)
+	self.HUD:update(dt)
 end
 
 function GameClient:draw()
-
+	self.HUD:draw()
 end

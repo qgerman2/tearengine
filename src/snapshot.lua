@@ -32,7 +32,7 @@ function Snapshot:apply(level)
 	--remove unnecessary entities
 	for i, ent in pairs(level.Entities) do
 		if ent then
-			if not self.Entities[i] then
+			if not ent.persist and not self.Entities[i] then
 				level:removeEntity(i)
 			end
 		end
@@ -60,6 +60,7 @@ end
 
 function Snapshot:clearSpatialData(entityID)
 	local entity = self.Entities[entityID]
+	if not entity then return false end
 	entity.x, entity.y, entity.r, entity.vx, entity.vy, entity.vr = nil, nil, nil, nil, nil, nil
 end
 

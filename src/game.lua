@@ -51,8 +51,8 @@ function Game:g_update(dt)
 end
 
 function Game:g_draw()
-	if self.draw then self.draw() end
 	self.Camera:draw()
 	self.Level:draw()
 	self.Camera:undo()
+	if self.draw then self:draw() end
 end
