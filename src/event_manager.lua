@@ -26,43 +26,17 @@ function EventManager:setServerTick(tick)
 end
 
 function EventManager:event(eventData)
-	local type = tonumber(eventData.type)
-	--Create event
+	local type = eventData.type
 	local newEvent = false
-	if type == 08 then newEvent = self:PlayerInput(eventData)
-	elseif type == 11 then newEvent = self:EntityUpdate(eventData)
-	elseif type == 12 then newEvent = self:EntityCreation(eventData)
-	elseif type == 13 then newEvent = self:EntityUpdate(eventData)
-	elseif type == 14 then newEvent = self:EntityDestruction(eventData)
-	--elseif type == 15 then newEvent = self:TerrainDeformation(eventData) end
-	elseif type == 16 then newEvent = self:ProjectileFire(eventData) end
-	--Add it if necessary
+	if type == MSG.SendInput then newEvent = self:PlayerInput(eventData)
+	elseif type == MSG.SyncEntity then newEvent = self:EntityUpdate(eventData)
+	elseif type == MSG.SyncEntityPredict then newEvent = self:EntityCreation(eventData)
+	elseif type == MSG.SyncEntityPosition then newEvent = self:EntityUpdate(eventData)
+	elseif type == MSG.SyncEntityRemove then newEvent = self:EntityDestruction(eventData)
+	elseif type == MSG.ProjectileFire then newEvent = self:ProjectileFire(eventData) end
 	if newEvent then
 		table.insert(self.Events, 1, newEvent)
 	end
-end
-
-function EventManager:UnitUpdate(eventData)
-	local unitanims = {
-		[1] = "idle",
-		[2] = "run",
-	}
-	local unit = self.GameClient.Level.Entities[tonumber(eventData.entityID)]
-	if not unit.Interpolation then unit.Interpolation = EntityInterpolator(unit) end	
-	local snapshot = {
-		tick = tonumber(eventData.tick),
-		x = tonumber(eventData.x),
-		y = tonumber(eventData.y),
-		input = {
-			aim = tonumber(eventData.aim)
-		},
-		_runLastDirection = eventData.direction,
-		anim = {
-			anim = unitanims[tonumber(eventData.animation)]
-		},
-	}
-	unit.Interpolation:addSnapshot(snapshot)
-	unit.Interpolation:setDisplayTick(self.displayTick)
 end
 
 function EventManager:PlayerInput(eventData)
@@ -103,11 +77,11 @@ end
 function EventManager:EntityCreation(eventData)
 	local event = {
 		type = "EntityCreation",
-		tick = tonumber(eventData.tick),
+		tick = eventData.tick,
 		kind = eventData.kind,
-		id = tonumber(eventData.entityID),
-		x = tonumber(eventData.x),
-		y = tonumber(eventData.y),
+		id = eventData.entityID,
+		x = eventData.x,
+		y = eventData.y,
 		vx = eventData.vx,
 		vy = eventData.vy
 	}
@@ -120,8 +94,8 @@ end
 function EventManager:EntityDestruction(eventData)
 	local event = {
 		type = "EntityDestruction",
-		tick = tonumber(eventData.tick),
-		id = tonumber(eventData.entityID),
+		tick = eventData.tick,
+		id = eventData.entityID,
 	}
 	if event.tick <= self.displayTick then
 		event.tick = self.displayTick + 1
@@ -132,11 +106,11 @@ end
 function EventManager:TerrainDeformation(eventData)
 	local event = {
 		type = "TerrainDeformation",
-		tick = tonumber(eventData.tick),
+		tick = eventData.tick,
 		kind = eventData.kind,
-		x = tonumber(eventData.x),
-		y = tonumber(eventData.y),
-		mod = tonumber(eventData.mod),
+		x = eventData.x,
+		y = eventData.y,
+		mod = eventData.mod,
 	}
 	if event.tick <= self.displayTick then
 		table.insert(self.GameClient.Level.TerrainDeformations, event)
@@ -146,19 +120,9 @@ function EventManager:TerrainDeformation(eventData)
 end
 
 function EventManager:ProjectileFire(eventData)
-	if eventData.peerID == self.GameClient._peerID then
+	if eventData.peerID == self.GameClient.peerID then
 		return self:EntityCreation(eventData)
 	end
-	--[[local event = {
-		type = "ProjectileFire",
-		tick = tonumber(eventData.tick),
-		kind = eventData.kind,
-		id = tonumber(eventData.entityID),
-		x = tonumber(eventData.x),
-		y = tonumber(eventData.y),
-		vx = eventData.vx,
-		vy = eventData.vy
-	}]]--
 	local game = self.GameClient
 	local tick = game._syncInputTick
 	local temp = false

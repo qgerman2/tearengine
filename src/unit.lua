@@ -2,7 +2,6 @@ Unit = class("Unit", Entity)
 
 function Unit:initialize(x, y, b2World)
 	Entity.initialize(self, x, y)
-	self.kind = "Unit"
 	self.anim = UnitAnimator(self)
 
 	self.width = 10

@@ -28,12 +28,11 @@ require("src.hud")
 require("src.event_manager")
 require("src.snapshot")
 require("src.entity")
-require("src.box")
 require("src.unit")
 require("src.unit_animator")
 
 require("src.weapon")
-require("src.projectile")
+require("src.rocket")
 require("src.bazooka")
 
 function love.load()
@@ -73,13 +72,15 @@ function love.keypressed(key)
 		elseif key == "t" then
 			local unit = client.Game.localPeer.Players[1].unit
 			unit:setPosition(200, 200)
-		elseif key == "e" then
-			client.Game:rewind(10)
 		end
 	elseif server then
 		if key == "q" then
 			server:startGame()
 		end
+	end
+	if key == "v" then
+		local width, height, flags = love.window.getMode()
+		love.window.setMode(width, height, {vsync = not flags.vsync})
 	end
 end
 

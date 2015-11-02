@@ -26,8 +26,8 @@ function GameServer:preTick(t)
 	for peerID, peer in pairs(self.Peers) do
 		for playerID, player in pairs(peer.Players) do
 			if #player.inputBuffer > 0 then
-				player.tick = tonumber(player.inputBuffer[1].tick)
-				peer.tick = tonumber(player.inputBuffer[1].tick)
+				player.tick = player.inputBuffer[1].tick
+				peer.tick = player.inputBuffer[1].tick
 				player.unit:applyInput(player.inputBuffer[1])
 				player.input = player.inputBuffer[1]
 				table.remove(player.inputBuffer, 1)
@@ -41,11 +41,10 @@ function GameServer:postTick(t)
 end
 
 function GameServer:processInput(msg, peer)
-	local player = peer.Players[tonumber(msg.playerID)]
-	local tick = tonumber(msg.tick)
-	if tick <= player.tick then return end
+	local player = peer.Players[msg.playerID]
+	if msg.tick <= player.tick then return end
 	for k, v in pairs(player.inputBuffer) do
-		if tonumber(v.tick) == tick then
+		if v.tick == msg.tick then
 			return
 		end
 	end
@@ -65,13 +64,13 @@ function GameServer:processMessage(msg, peer)
 end
 
 function GameServer:syncEntityCreation(entity, id)
-	if entity.kind == "Box" then
+	if entity.projectile then
 		self:broadcastMessage({
 			[0] = MSG.ProjectileFire,
 			[1] = self._tick,
-			[2] = entity.owner.peerID,
+			[2] = entity.source.owner.peerID,
 			[3] = id,
-			[4] = entity.kind,
+			[4] = entity.class.name,
 			[5] = entity.x,
 			[6] = entity.y,
 			[7] = entity.vx,
@@ -82,7 +81,7 @@ function GameServer:syncEntityCreation(entity, id)
 			[0] = MSG.SyncEntityCreate,
 			[1] = self._tick,
 			[2] = id,
-			[3] = entity.kind,
+			[3] = entity.class.name,
 			[4] = entity.x,
 			[5] = entity.y,
 			[6] = entity.vx,
@@ -112,7 +111,7 @@ function GameServer:sendLevelSnapshot()
 		for entityID, entity in pairs(self.Level.Entities) do
 			if entity then
 				--Units
-				if entity.kind == "Unit" then
+				if entity.class.name == "Unit" then
 					local peerID = entity.peerID
 					local playerID = entity.playerID
 					local peer = entity.peer
@@ -161,13 +160,13 @@ function GameServer:sendLevelSnapshot()
 							})
 						end
 					end
-				elseif entity.kind == "Box" then
+				elseif entity.class.name == "Rocket" then
 					local x, y = entity:getPosition()
 					local r = entity:getAngle()
 					local vx, vy = entity:getLinearVelocity()
 					local vr = entity:getAngularVelocity()
 					if entity.b2Body:isAwake() then
-						if entity.owner.peerID == destPeerID then
+						if entity.source.owner.peerID == destPeerID then
 							destPeer.Courier:addMessage({
 								[0] = MSG.SyncEntity,
 								[1] = entityID,

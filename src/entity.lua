@@ -1,8 +1,7 @@
 Entity = class("Entity")
 
 function Entity:initialize(x, y)
-	self.kind = "undefined"
-	self.active = false
+	self.priority = 0
 	self.shared = true
 	self.x, self.y = x, y
 	self.r = 0
@@ -13,31 +12,6 @@ end
 function Entity:destroy()
 	if self.b2Body then
 		self.b2Body:destroy()
-	end
-end
-
-function Entity:setActive(active)
-	if not active then
-		self.active = false
-		self.b2Body:setActive(false)
-		if self.lastActiveState then return end
-		self.lastActiveState = {}
-		local las = self.lastActiveState
-		las.x, las.y = self:getPosition()
-		las.r = self:getAngle()
-		las.vx, las.vy = self:getLinearVelocity()
-		las.vr = self:getAngularVelocity()
-	else
-		self.active = true
-		self.b2Body:setActive(true)
-		if self.lastActiveState then
-			local las = self.lastActiveState
-			self:setPosition(las.x, las.y)
-			self:setAngle(las.r)
-			self:setLinearVelocity(las.vx, las.vy)
-			self:setAngularVelocity(las.vr)
-			self.lastActiveState = nil
-		end
 	end
 end
 
@@ -123,7 +97,6 @@ function Entity:b2EndContact(fixtureA, fixtureB, contact)
 end
 
 function Entity:e_update(t)
-	if not self.active then return end
 	if self.update then self:update(t) end
 	local pastX, pastY = self.x, self.y
 	if self.b2Body then

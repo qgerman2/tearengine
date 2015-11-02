@@ -12,17 +12,16 @@ function Level:initialize(game, mapFile)
 	self.TerrainDeformations = {}
 end
 
-function Level:addEntity(entity, id, source)
+function Level:addEntity(entity, id)
 	if not id then
 		entity.id = #self.Entities + 1
 	else
 		entity.id = id
 	end
 	entity.Level = self
-	entity.active = true
 	self.Entities[entity.id] = entity
 	if server and entity.shared then
-		self.Game:syncEntityCreation(entity, entity.id, source)
+		self.Game:syncEntityCreation(entity, entity.id)
 	end
 	return entity.id
 end
@@ -79,15 +78,11 @@ function Level:b2BeginContact(fixtureB, contact)
 	local ShapeB = fixtureB:getUserData()
 	if type(ShapeA) == "table" and ShapeA.contacts then
 		ShapeA.contacts[#ShapeA.contacts + 1] = {fixtureA, fixtureB, contact}
-		if ShapeA.entity.active then
-			ShapeA.entity:b2BeginContact(fixtureA, fixtureB, contact)
-		end
+		ShapeA.entity:b2BeginContact(fixtureA, fixtureB, contact)
 	end
 	if type(ShapeB) == "table" and ShapeB.contacts then
 		ShapeB.contacts[#ShapeB.contacts + 1] = {fixtureA, fixtureB, contact}
-		if ShapeB.entity.active then
-			ShapeB.entity:b2BeginContact(fixtureA, fixtureB, contact)
-		end
+		ShapeB.entity:b2BeginContact(fixtureA, fixtureB, contact)
 	end
 end
 

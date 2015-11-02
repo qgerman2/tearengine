@@ -7,7 +7,7 @@ function Client:initialize(address)
 
 	self.Peers = {}
 	self.MessageRate = 1 / 30
-	self._MessageTimer = 0
+	self.MessageTimer = 0
 
 	self.name = "swagg"
 	self.id = -1
@@ -79,7 +79,7 @@ end
 
 function Client:onJoinAccepted(msg)
 	self.state = "lobby"
-	self.id = tonumber(msg.peerID)
+	self.id = msg.peerID
 	self.Peers[self.id] = {
 		["id"] = self.id,
 		["name"] = self.name,
@@ -94,11 +94,11 @@ function Client:onJoinDenied(msg)
 end
 
 function Client:processPeerState(msg)
-	local peerID = tonumber(msg.peerID)
+	local peerID = msg.peerID
 	if not self.Peers[peerID] then self.Peers[peerID] = {} end
 	self.Peers[peerID].id = peerID
 	self.Peers[peerID].name = msg.peerName
-	self.Peers[peerID].playerCount = tonumber(msg.peerPlayers)
+	self.Peers[peerID].playerCount = msg.peerPlayers
 	self.Peers[peerID].ready = msg.ready == "1" or false
 end
 
@@ -146,10 +146,10 @@ function Client:update(dt)
 	if self.state == "ingame" then
 		self.Game:g_update(dt)
 	end
-	self._MessageTimer = self._MessageTimer + dt
-	while self._MessageTimer >= self.MessageRate do
-		self._MessageTimer = self._MessageTimer - self.MessageRate
-		if self._MessageTimer < self.MessageRate then
+	self.MessageTimer = self.MessageTimer + dt
+	while self.MessageTimer >= self.MessageRate do
+		self.MessageTimer = self.MessageTimer - self.MessageRate
+		if self.MessageTimer < self.MessageRate then
 			if self.Game then
 				self.Game:prePacket(self.MessageRate)
 			end

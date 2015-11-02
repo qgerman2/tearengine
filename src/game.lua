@@ -5,11 +5,11 @@ function Game:initialize(mapFile, peerID)
 
 	self.timeStep = 1 / 60
 	self.tickRate = 1 / 60
-	self._tickRateTimer = 0
+	self.tickRateTimer = 0
 
 	self._tick = 0
 
-	self._peerID = peerID
+	self.peerID = peerID
 
 	self.Level = Level(self, mapFile)
 
@@ -42,11 +42,11 @@ end
 function Game:g_update(dt)
 	self.InputHandler:update(self)
 	if self.update then self:update(dt) end
-	self._tickRateTimer = self._tickRateTimer + dt
-	while self._tickRateTimer >= self.tickRate do
+	self.tickRateTimer = self.tickRateTimer + dt
+	while self.tickRateTimer >= self.tickRate do
 		self._tick = self._tick + 1
 		self:g_tick(self.timeStep)
-		self._tickRateTimer = self._tickRateTimer - self.tickRate
+		self.tickRateTimer = self.tickRateTimer - self.tickRate
 	end
 end
 

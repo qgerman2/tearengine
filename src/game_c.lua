@@ -72,19 +72,18 @@ function GameClient:processInput(t)
 end
 
 function GameClient:processMessage(msg)
-	local type = tonumber(msg.type)
-	if type == 09 then self:setServerTick(msg)
-	elseif type == 10 then self:checkEntitySync(msg)
-	elseif type == 15 then self:setPredictTick(msg)
-	elseif type == 17 then self:updateUnitHealth(msg)
-	elseif type == 08 or type == 16 or type >= 11 and type <= 14 then
-		self.EventManager:event(msg)
+	if msg.type == MSG.SyncTick then self:setServerTick(msg)
+	elseif msg.type == MSG.SyncEntityPredict then self:checkEntitySync(msg)
+	elseif msg.type == MSG.SyncTickPredict then self:setPredictTick(msg)
+	elseif msg.type == MSG.UnitHealth then self:updateUnitHealth(msg)
+	else 
+		self.EventManager:event(msg) 
 	end
 end
 
 function GameClient:setServerTick(msg)
 	if love.timer.getDelta() > 1 / 30 then return end
-	self.EventManager:setServerTick(tonumber(msg.tick))
+	self.EventManager:setServerTick(msg.tick)
 end
 
 function GameClient:setPredictTick(msg)

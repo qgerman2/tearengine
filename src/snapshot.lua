@@ -10,7 +10,7 @@ function Snapshot:initialize(level)
 			local vx, vy = entity:getLinearVelocity()
 			local vr = entity:getAngularVelocity()
 			self.Entities[id] = {
-				kind = entity.kind,
+				kind = entity.class.name,
 				x = x,
 				y = y,
 				r = r,
@@ -18,7 +18,7 @@ function Snapshot:initialize(level)
 				vy = vy,
 				vr = vr,
 			}
-			if entity.kind == "Unit" then
+			if entity.class.name == "Unit" then
 				self.Entities[id].input = {}
 				for action, state in pairs(entity.input) do
 					self.Entities[id].input[action] = state
@@ -50,7 +50,7 @@ function Snapshot:apply(level)
 			entity:setLinearVelocity(ent.vx, ent.vy)
 			entity:setAngularVelocity(ent.vr)
 		end
-		if entity.kind == "Unit" then
+		if entity.class.name == "Unit" then
 			for action, state in pairs(ent.input) do
 				entity.input[action] = state
 			end

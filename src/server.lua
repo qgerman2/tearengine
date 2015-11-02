@@ -6,7 +6,7 @@ function Server:initialize(address)
 
 	self.Peers = {}
 	self.MessageRate = 1 / 30
-	self._MessageTimer = 0
+	self.MessageTimer = 0
 
 	math.randomseed(os.clock())
 	self.hostID = tostring(math.random(10000, 99999)) --legit
@@ -16,7 +16,7 @@ function Server:initialize(address)
 	self.hostName = "test server"
 	self.hostMOTD = "PLEASE ACCEPT MY FRIEND REQUEST"
 	self.playersMax = 16
-	self._playersCurrent = 0
+	self.playersCurrent = 0
 	self.map = "rsc/map3.png"
 	self.state = "lobby"
 end
@@ -52,7 +52,7 @@ function Server:onPeerJoinAccepted(peer, request)
 	peer.state = "connected"
 	peer.lerp = 100
 	peer.name = request.peerName
-	peer.playerCount = tonumber(request.peerPlayers)
+	peer.playerCount = request.peerPlayers
 	--Update our new peer with other peers data
 	for id, p in pairs(self.Peers) do
 		if id ~= peer.id then
@@ -100,7 +100,7 @@ function Server:sendServerInfo(peer)
 		[5] = passworded,
 		[6] = self.map,
 		[7] = self.playersMax,
-		[8] = self._playersCurrent,
+		[8] = self.playersCurrent,
 	})
 end
 
@@ -186,10 +186,10 @@ function Server:update(dt)
 	if self.state == "ingame" then
 		self.Game:g_update(dt)
 	end
-	self._MessageTimer = self._MessageTimer + dt
-	while self._MessageTimer >= self.MessageRate do
-		self._MessageTimer = self._MessageTimer - self.MessageRate
-		if self._MessageTimer < self.MessageRate then
+	self.MessageTimer = self.MessageTimer + dt
+	while self.MessageTimer >= self.MessageRate do
+		self.MessageTimer = self.MessageTimer - self.MessageRate
+		if self.MessageTimer < self.MessageRate then
 			if self.state == "ingame" then self.Game:sendLevelSnapshot() end
 			for id, peer in pairs(self.Peers) do
 				local packet = peer.Courier:buildPacket()
