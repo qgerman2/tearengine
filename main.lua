@@ -1,6 +1,7 @@
 print(_VERSION)
 print(jit.version .. "\n")
 
+utf8 = require("utf8")
 mp = require("lib.luajit-msgpack-pure")
 class = require("lib.middleclass")
 clipper = require("lib.clipper")
@@ -24,6 +25,7 @@ require("src.chunk")
 require("src.level")
 require("src.input")
 require("src.hud")
+require("src.chatbox")
 
 require("src.event_manager")
 require("src.snapshot")
@@ -40,6 +42,7 @@ function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	love.graphics.setBackgroundColor(50, 50, 50)
 	love.graphics.setLineStyle("rough")
+	love.keyboard.setKeyRepeat(true)
 end
 
 function love.gamepadpressed(joystick, button)
@@ -69,9 +72,6 @@ function love.keypressed(key)
 	elseif client then
 		if key == "r" then
 			client:toggleReady()
-		elseif key == "t" then
-			local unit = client.Game.localPeer.Players[1].unit
-			unit:setPosition(200, 200)
 		end
 	elseif server then
 		if key == "q" then
@@ -88,6 +88,10 @@ function love.keyreleased(key)
 	if client then client:keyReleased(key) end
 end
 
+function love.textinput(t)
+	if client then client:textInput(t) end
+end
+
 function love.update(dt)
 	if client and client.Game then client.Game.InputHandler:update(client.Game) end
 	if client then client:update(dt) end
@@ -96,4 +100,5 @@ end
 
 function love.draw()
 	if game then game:g_draw() end
+	if client then client:draw() end
 end

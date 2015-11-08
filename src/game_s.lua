@@ -1,7 +1,8 @@
 GameServer = class("GameServer", Game)
 
-function GameServer:initialize(mapFile, Peers)
+function GameServer:initialize(mapFile, Peers, Server)
 	Game.initialize(self, mapFile, 0)
+	self.Server = Server
 	self.Peers = Peers
 	self:spawnUnits()
 
@@ -60,7 +61,8 @@ function GameServer:processInput(msg, peer)
 end
 
 function GameServer:processMessage(msg, peer)
-	if msg.type == MSG.SendInput then self:processInput(msg, peer) end
+	if msg.type == MSG.SendInput then self:processInput(msg, peer)
+	elseif msg.type == MSG.ChatInput then self:processChatInput(msg, peer) end
 end
 
 function GameServer:syncEntityCreation(entity, id)
@@ -195,6 +197,39 @@ function GameServer:sendLevelSnapshot()
 			end
 		end
 	end
+end
+
+function GameServer:processChatInput(msg, peer)
+	local text, peerID = self:parseChatInput(peer, msg.text)
+	self:broadcastMessage({
+		[0] = MSG.ChatOutput,
+		[1] = peerID,
+		[2] = text,
+	})
+end
+
+function GameServer:parseChatInput(peer, text)
+	local peerID = peer.id
+	local commands = {
+		["name"] =
+			function(peer, name)
+				text = "'" .. peer.name .. "' is now known as '" .. name .. "'"
+				peerID = 0
+				peer.name = name
+				self.Server:broadcastPeerState(peer.id)
+			end,
+	}
+	if string.sub(text, 1, 1) == "/" then
+		local commandString = string.sub(text, 2)
+		local args = commandString:split(" ")
+		for i = #args, 1, -1 do
+			if #args[i] == 0 then table.remove(args, i) end
+		end
+		if commands[string.lower(args[1])] then
+			commands[string.lower(args[1])](peer, unpack(args, 2))
+		end
+	end
+	return text, peerID
 end
 
 function GameServer:update(dt)

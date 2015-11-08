@@ -76,7 +76,8 @@ function GameClient:processMessage(msg)
 	elseif msg.type == MSG.SyncEntityPredict then self:checkEntitySync(msg)
 	elseif msg.type == MSG.SyncTickPredict then self:setPredictTick(msg)
 	elseif msg.type == MSG.UnitHealth then self:updateUnitHealth(msg)
-	else 
+	elseif msg.type == MSG.ChatOutput then self:processChatOutput(msg)
+	else
 		self.EventManager:event(msg) 
 	end
 end
@@ -145,6 +146,14 @@ end
 function GameClient:updateUnitHealth(msg)
 	local unit = self.Level.Entities[msg.entityID]
 	unit.health = msg.health
+end
+
+function GameClient:processChatOutput(msg)
+	local name = "Server"
+	if msg.peerID ~= 0 then
+		name = self.Peers[msg.peerID].name
+	end
+	self.HUD.Chatbox:addEntry(name .. ": " .. msg.text)
 end
 
 function GameClient:update(dt)

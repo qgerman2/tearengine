@@ -9,11 +9,12 @@ function HUD:initialize(game)
 		[3] = {r = 0, g = 255, b = 0},
 	}
 	self.font = love.graphics.newFont("rsc/munro_small.ttf", 10)
+	self.Chatbox = Chatbox(game, self.font)
 	love.graphics.setFont(self.font)
 end
 
 function HUD:update(dt)
-
+	self.Chatbox:update(dt)
 end
 
 function HUD:draw()
@@ -24,10 +25,11 @@ function HUD:draw()
 			local x, y = Camera:worldToScreen(player.unit:getPosition())
 			local color = self.colors[peerID]
 			if not color then color = self.colors[0] end
-			love.graphics.printf(peer.name, x - 100, y - 34, 200, "center")
+			love.graphics.printf(peer.name, x - 100, y - 35, 200, "center")
 			love.graphics.setColor(color.r, color.g, color.b)
 			love.graphics.printf(player.unit.health, x - 50, y - 28, 100, "center")
 			love.graphics.setColor(255, 255, 255)
 		end
 	end
+	self.Chatbox:draw()
 end

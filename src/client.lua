@@ -14,6 +14,9 @@ function Client:initialize(address)
 	self.ready = true
 	self.state = "idle"
 
+	self.ChatboxInput = false
+	self.ChatboxToggle = "t"
+	self.ChatboxGate = false
 	self.serverInfo = {}
 end
 
@@ -26,11 +29,37 @@ function Client:mouseReleased(x, y, button)
 end
 
 function Client:keyPressed(key)
-	if self.Game then self.Game.InputHandler:keyPressed(key) end
+	if self.ChatboxInput then
+		self.Game.HUD.Chatbox:keyPressed(key)
+		if key == "return" and self.ChatboxInput then
+			self.ChatboxInput = false
+			self.Game.HUD.Chatbox.focus = false
+		end
+	elseif not self.ChatboxInput and key == self.ChatboxToggle then
+		self.ChatboxInput = true
+		self.Game.HUD.Chatbox.focus = true
+		self.ChatboxGate = true
+		return
+	end
+	if self.Game and not self.ChatboxInput then
+		self.Game.InputHandler:keyPressed(key)
+	end
 end
 
 function Client:keyReleased(key)
-	if self.Game then self.Game.InputHandler:keyReleased(key) end
+	if self.Game and not self.ChatboxInput then
+		self.Game.InputHandler:keyReleased(key)
+	end
+end
+
+function Client:textInput(t)
+	if self.ChatboxInput and self.Game then
+		if self.ChatboxGate then
+			self.ChatboxGate = false
+		else
+			self.Game.HUD.Chatbox:textInput(t)
+		end
+	end
 end
 
 function Client:gamepadPressed(joystick, button)
@@ -99,7 +128,7 @@ function Client:processPeerState(msg)
 	self.Peers[peerID].id = peerID
 	self.Peers[peerID].name = msg.peerName
 	self.Peers[peerID].playerCount = msg.peerPlayers
-	self.Peers[peerID].ready = msg.ready == "1" or false
+	self.Peers[peerID].ready = msg.ready
 end
 
 function Client:toggleReady()
@@ -142,7 +171,6 @@ function Client:update(dt)
 			end
 		end
 	end
-
 	if self.state == "ingame" then
 		self.Game:g_update(dt)
 	end
@@ -160,7 +188,5 @@ function Client:update(dt)
 end
 
 function Client:draw()
-	if self.state == "ingame" then
-		--self.Game:g_draw()
-	end
+	
 end

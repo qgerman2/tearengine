@@ -17,6 +17,8 @@ MSG = {							--Reliable
 	SyncTickPredict		= "15",
 	ProjectileFire		= "16", --*
 	UnitHealth			= "17",
+	ChatInput			= "18", --*
+	ChatOutput			= "19", --*
 }
 
 local MessageType = {
@@ -139,7 +141,16 @@ local MessageType = {
 	["17"] = {
 		"entityID",
 		"health",
-	}
+	},
+	["18"] = {
+		"text",
+		reliable = true,
+	},
+	["19"] = {
+		"peerID",
+		"text",
+		reliable = true,
+	},
 }
 
 Courier = class("Courier")

@@ -61,7 +61,7 @@ function Server:onPeerJoinAccepted(peer, request)
 				[1] = p.id,
 				[2] = p.name,
 				[3] = p.playerCount,
-				[4] = p.ready and 1 or 0,
+				[4] = p.ready and true or false,
 			})
 		end
 	end
@@ -85,12 +85,12 @@ function Server:broadcastPeerState(id)
 		[1] = peer.id,
 		[2] = peer.name,
 		[3] = peer.playerCount,
-		[4] = peer.ready and 1 or 0,
+		[4] = peer.ready and true or false,
 	})
 end
 
 function Server:sendServerInfo(peer)
-	local passworded = not (self.hostPassword == "") and 1 or 0
+	local passworded = not (self.hostPassword == "") and true or false
 	peer.Courier:addMessage({
 		[0] = MSG.SendInfo,
 		[1] = _version,
@@ -145,7 +145,7 @@ function Server:startGame()
 	end
 	--Magic
 	self.state = "ingame"
-	self.Game = GameServer(self.map, self.Peers)
+	self.Game = GameServer(self.map, self.Peers, self)
 	game = self.Game
 	self:broadcastMessage({
 		[0] = MSG.StartGame,
