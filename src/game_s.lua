@@ -213,10 +213,12 @@ function GameServer:parseChatInput(peer, text)
 	local commands = {
 		["name"] =
 			function(peer, name)
-				text = "'" .. peer.name .. "' is now known as '" .. name .. "'"
-				peerID = 0
-				peer.name = name
-				self.Server:broadcastPeerState(peer.id)
+				if name then
+					text = "'" .. peer.name .. "' is now known as '" .. name .. "'"
+					peerID = 0
+					peer.name = name
+					self.Server:broadcastPeerState(peer.id)
+				end
 			end,
 	}
 	if string.sub(text, 1, 1) == "/" then
