@@ -25,7 +25,7 @@ function string:split( inSplitPattern, outResults )
    return outResults
 end
 
-function utils.speedVector(dist, a)
+function utils.speedToVelocity(dist, a)
   local dx = math.cos(a) * dist;
   local dy = math.sin(a) * dist;
   return dx, dy;

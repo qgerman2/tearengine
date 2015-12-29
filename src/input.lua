@@ -43,7 +43,7 @@ function Input:initialize()
 	}
 
 	self.mouseBindings = {
-		["l"]	= "fire1",
+		[1]	= "fire1",
 		["r"]	= "cancel",
 	}
 

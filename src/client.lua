@@ -9,7 +9,7 @@ function Client:initialize(address)
 	self.MessageRate = 1 / 30
 	self.MessageTimer = 0
 
-	self.name = "swagg"
+	self.name = "asdf"
 	self.id = -1
 	self.ready = true
 	self.state = "idle"

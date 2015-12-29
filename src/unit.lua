@@ -5,24 +5,27 @@ function Unit:initialize(x, y, b2World)
 	self.anim = UnitAnimator(self)
 
 	self.width = 10
-	self.height = 23
+	self.height = 30
 
 	self:b2Physics(b2World)
 	self:b2Category({2})
 	self.b2Body:setLinearDamping(0.1)
 	self.b2Body:setFixedRotation(true)
 	self.b2Body:setBullet(true)
-	self.topShape = self:b2Shape(love.physics.newRectangleShape(self.width, self.height))
+	self.topShape = self:b2Shape(love.physics.newRectangleShape(0, -(self.height / 2 - self.height / 3), self.width, (self.height / 3) * 2))
 	self.topShape.b2Fixture:setFriction(0.5)
 	self.topShape.b2Fixture:setRestitution(0.2)
 	self.topShape.b2Fixture:setDensity(1)
-	self.feetShape = self:b2Shape(love.physics.newCircleShape(0, self.height / 2, self.width / 2))
-	self.leftSensor = self:b2Shape(love.physics.newRectangleShape(-self.width / 2 - 1, 0, 2, self.height))
-	self.rightSensor = self:b2Shape(love.physics.newRectangleShape(self.width / 2 + 1, 0, 2, self.height))
+	self.feetShape = self:b2Shape(love.physics.newRectangleShape(0, self.height / 3, self.width - 2, self.height / 3))
+	self.feetShape.b2Fixture:setSensor(true)
+	self.leftSensor = self:b2Shape(love.physics.newRectangleShape(-self.width / 2 - 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
+	self.rightSensor = self:b2Shape(love.physics.newRectangleShape(self.width / 2 + 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
 	self.leftSensor.b2Fixture:setSensor(true)
 	self.leftSensor.b2Fixture:setDensity(0)
 	self.rightSensor.b2Fixture:setSensor(true)
 	self.rightSensor.b2Fixture:setDensity(0)
+
+	self.b2Body:resetMassData()
 
 	self.onGround = false
 	self.roping = false
@@ -72,6 +75,12 @@ function Unit:applyInput(input)
 	self.input["aim"] = math.rad(self.input["aim"])
 end
 
+function Unit:b2BeginContact(fixtureA, fixtureB, b2Contact)
+	if fixtureA == self.feetShape.b2Fixture or fixtureB == self.feetShape.b2Fixture then
+		
+	end
+end
+
 function Unit:update(t)
 	self.feetShape.b2Fixture:setRestitution(0)
 	self.topShape.b2Fixture:setRestitution(0)
@@ -83,13 +92,33 @@ function Unit:update(t)
 	local aimAngle = self.input["aim"]
 	local walkSpeed = self.walkSpeed
 	local canWalk = false
-
-	self.b2Body:setGravityScale(1)
-	self.onGround = false
 	if #self.feetShape.contacts >= 1 then
 		self.onGround = true
+		self.b2Body:setGravityScale(0)
+		local x, y = self.b2Body:getPosition()
+		local hy = -1
+		self.b2World:rayCast(x - self.width / 2 + 1, y, x - self.width / 2 + 1, y + self.height / 2 - 1,
+			function(b2Fixture, xx, yy)
+				if b2Fixture:getUserData() ~= "Terrain" then return -1 end
+				if yy < hy or hy == -1 then hy = yy end
+				return -1
+			end
+		)
+		self.b2World:rayCast(x + self.width / 2 - 1, y, x + self.width / 2 - 1, y + self.height / 2 - 1,
+			function(b2Fixture, xx, yy)
+				if b2Fixture:getUserData() ~= "Terrain" then return -1 end
+				if yy < hy or hy == -1 then hy = yy end
+				return -1
+			end
+		)
+		if hy ~= -1 then
+			self.b2Body:setPosition(x, utils.round(hy - self.height / 2))
+			self.b2Body:setLinearVelocity(vx, 0)
+		end
+	else
+		self.onGround = false
+		self.b2Body:setGravityScale(1)
 	end
-	
 	if self.input["right"] then
 		self.direction = "right"
 		if #self.rightSensor.contacts == 0 then canWalk = true end
@@ -99,7 +128,6 @@ function Unit:update(t)
 		if #self.leftSensor.contacts == 0 then canWalk = true end
 	else
 		if self.onGround and not self.roping then
-			self.b2Body:setGravityScale(0)
 			self.b2Body:applyLinearImpulse(mass * (0 - vx), 0)
 		end
 	end

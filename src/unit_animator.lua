@@ -72,11 +72,11 @@ function UnitAnimator:draw()
 	local angle = self.unit.input["aim"]
 	local angle2 = self.unit.input["aim"]
 	--Brazo2
-	love.graphics.draw(self.sprites, self.arms[2].quad, x, y - 4 + armyoffset, angle2 + math.pi, 1, xscaling, 11, 4)
+	love.graphics.draw(self.sprites, self.arms[2].quad, x, y - 6 + armyoffset, angle2 + math.pi, 1, xscaling, 11, 4)
 	
 	--Cuerpo
-	love.graphics.draw(self.sprites, quad, x, y + h * 0.75, 0, xscaling, 1, self.frameWidth / 2, self.frameHeight)
+	love.graphics.draw(self.sprites, quad, x, y + h / 2, 0, xscaling, 1, self.frameWidth / 2, self.frameHeight)
 	
 	--Brazo1
-	love.graphics.draw(self.sprites, self.arms[1].quad, x, y - 5 + armyoffset, angle + math.pi, 1, xscaling, 10, 2)
+	love.graphics.draw(self.sprites, self.arms[1].quad, x, y - 7 + armyoffset, angle + math.pi, 1, xscaling, 10, 2)
 end

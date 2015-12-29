@@ -109,7 +109,7 @@ end
 
 function Entity:e_draw(debug)
 	if self.draw then self:draw() end
-	if debug then
+	if true then
 		local r, g, b, a = love.graphics.getColor()
 		if self.b2Body then
 			for _, shape in pairs(self.b2Shapes) do

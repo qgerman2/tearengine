@@ -18,7 +18,7 @@ end
 
 function Game:g_tick(t)
 	self:preTick(self._tick)
-	self.Camera:update(t)
+	--self.Camera:update(t)
 	self.Level:update(t)
 	self:postTick(self._tick)
 end

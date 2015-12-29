@@ -67,7 +67,7 @@ function love.keypressed(key)
 		if key == "s" then
 			server = Server("*:27015")
 		elseif key == "c" then
-			client = Client("190.164.93.46:27015")
+			client = Client("190.164.25.53:27015")
 		end
 	elseif client then
 		if key == "r" then

@@ -8,7 +8,7 @@ function Camera:initialize()
 	
 	self.scale = 1
 	
-	self.screenWidth, self.screenHeight = love.window.getDimensions()
+	self.screenWidth, self.screenHeight = love.graphics.getDimensions()
 	
 	self.target = false
 	self.targetX = 0
@@ -25,7 +25,7 @@ function Camera:setTarget(x, y)
 end
 
 function Camera:update(dt)
-	self.screenWidth, self.screenHeight = love.window.getDimensions()
+	self.screenWidth, self.screenHeight = love.graphics.getDimensions()
 	
 	self.x = self.x + ((-self.targetX - self.x) * dt * 10)
 	self.y = self.y + ((-self.targetY - self.y) * dt * 10)

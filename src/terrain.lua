@@ -1,6 +1,7 @@
 Terrain = class("Terrain")
 
-function Terrain:initialize(b2World, mapFile)
+function Terrain:initialize(b2World, mapFile, debug)
+	self.debug = debug
 	self.rImage = love.image.newImageData(mapFile)
 	self.cImage = love.graphics.newImage(self.rImage)
 
@@ -150,7 +151,7 @@ end
 
 function Terrain:draw()
 	love.graphics.draw(self.cImage, 0, 0)
-	if false then
+	if self.debug then
 		local r, g, b, a = love.graphics.getColor()
 		for _, chunk in pairs(self.chunks) do
 			chunk:draw()

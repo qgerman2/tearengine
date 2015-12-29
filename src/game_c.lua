@@ -37,8 +37,8 @@ function GameClient:preTick(t)
 end
 
 function GameClient:postTick(t)
+	self.Camera:update(0.01)
 	self.Camera:setTarget(self.localPeer.Players[1].unit:getPosition())
-	self.Camera:update(0.005)
 	table.insert(self.journal, 1, Snapshot(self.Level))
 	if #self.journal > self.journalSize then
 		self.journal[self.journalSize + 1] = nil
@@ -108,7 +108,7 @@ function GameClient:checkEntitySync(msg)
 								utils.round(entity.vr) == utils.round(msg.vr)
 				if not sync then
 					self._sync = tick
-					--print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
+					print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
 					snapshotA:overwriteEntity(msg)
 					for ii = i - 1, 1, -1 do
 						local snapshotB = self.journal[ii]

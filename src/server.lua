@@ -17,7 +17,7 @@ function Server:initialize(address)
 	self.hostMOTD = "PLEASE ACCEPT MY FRIEND REQUEST"
 	self.playersMax = 16
 	self.playersCurrent = 0
-	self.map = "rsc/map3.png"
+	self.map = "rsc/map.png"
 	self.state = "lobby"
 end
 

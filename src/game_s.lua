@@ -56,7 +56,7 @@ function GameServer:processInput(msg, peer)
 		end
 	)
 	while #player.inputBuffer > self.inputBufferSize do
-		table.remove(player.inputBuffer, 1)
+		table.remove(player.inputBuffer, #player.inputBuffer)
 	end
 end
 

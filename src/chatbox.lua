@@ -7,7 +7,7 @@ function Chatbox:initialize(GameClient, font)
 	self.x = 10
 	self.y = 10
 	self.width = 250
-	self.height = 90
+	self.height = 86
 	self.lines = 6
 	self.canvas = love.graphics.newCanvas(self.width, self.height)
 	self.buffer = {
@@ -76,9 +76,9 @@ function Chatbox:draw()
 	love.graphics.rectangle("line", self.x, self.y + self.height - 12, self.width, 12)
 	--text
 	love.graphics.setCanvas(self.canvas)
-	self.canvas:clear()
+	love.graphics.clear()
 	local _, lines = self.font:getWrap(table.concat(self.buffer, "\n"), self.width)
-	if lines > self.lines then
+	if #lines > self.lines then
 		love.graphics.translate(0, -self.font:getHeight() * (lines - self.lines))
 	end
 	love.graphics.printf(table.concat(self.buffer, "\n"), 2, 0, self.width - 4, "left")

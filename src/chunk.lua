@@ -6,6 +6,7 @@ function Chunk:initialize(vertices, body, xCenter, yCenter)
 
 	self.b2Shape = love.physics.newChainShape(true, unpack(vertices))
 	self.b2Fixture = love.physics.newFixture(body, self.b2Shape)
+	self.b2Fixture:setFriction(0.5)
 	self.b2Fixture:setUserData("Terrain")
 	
 	self.clObject = clipper.polygon()

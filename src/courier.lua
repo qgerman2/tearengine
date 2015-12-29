@@ -158,8 +158,8 @@ Courier = class("Courier")
 function Courier:initialize(Bridge, peerID)
 	self.Bridge = Bridge
 	self.peerID = peerID or nil
-	self.BufferReliable = {}		--holds packets that must arrive
-	self.BufferUnreliable = {}		--doesnt matter if these are lost
+	self.BufferReliable = {}
+	self.BufferUnreliable = {}
 end
 
 function Courier:addMessage(Message)

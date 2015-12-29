@@ -6,7 +6,7 @@ function Rocket:initialize(x, y, b2World, source)
 	self.projectile = true
 	self:b2Physics(b2World)
 	self.boxBase = self:b2Shape(love.physics.newCircleShape(5))
-	self.boxBase.b2Fixture:setRestitution(0.9)
+	self.boxBase.b2Fixture:setRestitution(0.75)
 end
 
 function Rocket:b2BeginContact(fixtureA, fixtureB, contact)

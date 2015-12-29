@@ -2,8 +2,8 @@ EventManager = class("EventManager")
 
 function EventManager:initialize(gameClient)
 	self.GameClient = gameClient
-	self.delay = 80
-	self.jitterThreshold = 25 --ms
+	self.delay = 33.3
+	self.jitterThreshold = 16.6 --ms
 	self.displayTick = 0
 	self.serverTick = 0
 	self.skipTick = 0

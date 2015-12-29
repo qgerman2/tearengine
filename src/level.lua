@@ -1,11 +1,11 @@
 Level = class("Level")
 
 function Level:initialize(game, mapFile)
-	self.debug = true
+	self.debug = false
 	self.Game = game
 	self.b2World = love.physics.newWorld(0, 9.81 * 128, true)
 	self.b2World:setCallbacks(self.b2BeginContact, self.b2EndContact)
-	self.Terrain = Terrain(self.b2World, mapFile)
+	self.Terrain = Terrain(self.b2World, mapFile, self.debug)
 
 	self.Entities = {}
 
@@ -129,10 +129,12 @@ function Level:update(t)
 end
 
 function Level:draw()
-	self.Terrain:draw()
-	for _, entity in pairs(self.Entities) do
-		if entity then
-			entity:e_draw(self.debug)
+	if client then
+		self.Terrain:draw()
+		for _, entity in pairs(self.Entities) do
+			if entity then
+				entity:e_draw(self.debug)
+			end
 		end
 	end
 end

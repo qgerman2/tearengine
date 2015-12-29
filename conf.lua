@@ -1,6 +1,6 @@
 function love.conf(t)
 	t.identity = "TearEngine"
-	t.version = "0.9.2"
+	t.version = "0.10.0"
 	t.console = true
 
 	t.window.title = "Tear Engine Pre-Alpha"
