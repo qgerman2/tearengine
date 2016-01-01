@@ -30,8 +30,8 @@ function Input:initialize()
 		["righty"] = {"aim", deadzone = 0.15},
 		["leftshoulder"] = "jump",
 		["rightshoulder"] = "cancel",
-		["triggerleft"] = {"fire2", deadzone = 0.15},
-		["triggerright"] = {"fire1", deadzone = 0.15},
+		["triggerleft"] = "fire2",
+		["triggerright"] = "fire1",
 	}
 
 	self.keyboardBindings = {
@@ -170,8 +170,10 @@ function Input:gamepadAxis(joystick, axis, value)
 						local xaxis = joystick:getGamepadAxis("rightx")
 						local yaxis = joystick:getGamepadAxis("righty")
 						local angle = utils.angle(0, 0, xaxis, yaxis)
-						self.inputState[i]["aim"] = angle
+						self.inputState[i]["aim"] = math.deg(angle)
 					end
+				else
+					self.inputState[i][action] = value
 				end
 			end
 		end
@@ -186,6 +188,19 @@ function Input:update(game)
 		for id, device in ipairs(self.inputMethod) do
 			if players[id] then
 				if device == "m&k" then
+					if love.keyboard.isDown("lshift") then
+						if self.inputState[id]["left"] ~= 0 then
+							self.inputState[id]["left"] = 0.4
+						elseif self.inputState[id]["right"] ~= 0 then
+							self.inputState[id]["right"] = 0.4
+						end
+					else
+						if self.inputState[id]["left"] ~= 0 then
+							self.inputState[id]["left"] = 1
+						elseif self.inputState[id]["right"] ~= 0 then
+							self.inputState[id]["right"] = 1
+						end
+					end
 					local x, y = players[id].unit:getPosition()
 					local px, py = camera:worldToScreen(x, y)
 					local mx, my = 0, 0

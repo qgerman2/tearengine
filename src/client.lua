@@ -43,6 +43,11 @@ function Client:keyPressed(key)
 	end
 	if self.Game and not self.ChatboxInput then
 		self.Game.InputHandler:keyPressed(key)
+		if key == "f" then
+			local width, height, flags = love.window.getMode()
+			local dwidth, dheight = love.window.getDesktopDimensions()
+			love.window.setMode((flags.fullscreen and 1280 or dwidth), (flags.fullscreen and 720 or dheight), {vsync = not flags.vsync, fullscreen = not flags.fullscreen, fullscreentype = "exclusive"})
+		end
 	end
 end
 

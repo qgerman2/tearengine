@@ -18,6 +18,7 @@ function Unit:initialize(x, y, b2World)
 	self.topShape.b2Fixture:setDensity(1)
 	self.feetShape = self:b2Shape(love.physics.newRectangleShape(0, self.height / 3, self.width - 2, self.height / 3))
 	self.feetShape.b2Fixture:setSensor(true)
+	self.b2Body:setBullet(true)
 	self.leftSensor = self:b2Shape(love.physics.newRectangleShape(-self.width / 2 - 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
 	self.rightSensor = self:b2Shape(love.physics.newRectangleShape(self.width / 2 + 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
 	self.leftSensor.b2Fixture:setSensor(true)
@@ -28,6 +29,7 @@ function Unit:initialize(x, y, b2World)
 	self.b2Body:resetMassData()
 
 	self.onGround = false
+	self.onGroundExtraTicks = 10
 	self.roping = false
 	self.ropingSpeed = 7
 	self.ropingBounce = 1.1
@@ -55,6 +57,7 @@ function Unit:initialize(x, y, b2World)
 	}
 
 	self.health = 100
+	self._onGroundExtraTicks = 0
 end
 
 function Unit:applyInput(input)
@@ -93,6 +96,7 @@ function Unit:update(t)
 	local walkSpeed = self.walkSpeed
 	local canWalk = false
 	if #self.feetShape.contacts >= 1 then
+		self._onGroundExtraTicks = self.onGroundExtraTicks
 		self.onGround = true
 		self.b2Body:setGravityScale(0)
 		local x, y = self.b2Body:getPosition()
@@ -116,6 +120,9 @@ function Unit:update(t)
 			self.b2Body:setLinearVelocity(vx, 0)
 		end
 	else
+		if self._onGroundExtraTicks > 0 then
+			self._onGroundExtraTicks = self._onGroundExtraTicks - 1
+		end
 		self.onGround = false
 		self.b2Body:setGravityScale(1)
 	end
@@ -131,19 +138,19 @@ function Unit:update(t)
 			self.b2Body:applyLinearImpulse(mass * (0 - vx), 0)
 		end
 	end
+	walkSpeed = walkSpeed * math.abs(self.input["right"] or self.input["left"] or 1)
 	if canWalk then
-		if not self.roping then
+		if self.onGround then
+			self.b2Body:applyLinearImpulse(mass * (walkSpeed - vx), 0)
+		else
 			if math.abs(walkSpeed) > vx * utils.sign(walkSpeed) then
-				if self.onGround then
-					self.b2Body:applyLinearImpulse(mass * (walkSpeed - vx), 0)
-				else
-					self.b2Body:applyLinearImpulse(mass * walkSpeed * t * self.airAcceleration, 0)
-				end
+				self.b2Body:applyLinearImpulse(mass * walkSpeed * t * self.airAcceleration, 0)
 			end
 		end
 	end
 	if self.input["jump"] then
-		if self.onGround then
+		if self.onGround or not self.onGround and self._onGroundExtraTicks > 0 then
+			self._onGroundExtraTicks = 0
 			self.b2Body:applyLinearImpulse(0, mass * (-self.jumpImpulse - vy))
 		end
 	end

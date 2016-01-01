@@ -45,6 +45,10 @@ function love.load()
 	love.keyboard.setKeyRepeat(true)
 end
 
+function love.gamepadaxis(joystick, axis, value)
+	if client then client:gamepadAxis(joystick, axis, value) end
+end
+
 function love.gamepadpressed(joystick, button)
 	if client then client:gamepadPressed(joystick, button) end
 end
@@ -66,8 +70,9 @@ function love.keypressed(key)
 	if not server and not client then
 		if key == "s" then
 			server = Server("*:27015")
+			love.window.setMode(300, 100)
 		elseif key == "c" then
-			client = Client("190.164.25.53:27015")
+			client = Client("127.0.0.1:27015")
 		end
 	elseif client then
 		if key == "r" then
@@ -77,10 +82,6 @@ function love.keypressed(key)
 		if key == "q" then
 			server:startGame()
 		end
-	end
-	if key == "v" then
-		local width, height, flags = love.window.getMode()
-		love.window.setMode(width, height, {vsync = not flags.vsync})
 	end
 end
 

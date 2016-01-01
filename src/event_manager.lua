@@ -3,7 +3,7 @@ EventManager = class("EventManager")
 function EventManager:initialize(gameClient)
 	self.GameClient = gameClient
 	self.delay = 33.3
-	self.jitterThreshold = 16.6 --ms
+	self.jitterThreshold = 33.3 --ms
 	self.displayTick = 0
 	self.serverTick = 0
 	self.skipTick = 0
@@ -173,12 +173,12 @@ function EventManager:calculateDelay()
 	local currentDelay = self.serverTick - self.displayTick
 	local difference = currentDelay - desiredDelay
 	local tolerance = utils.round(self.jitterThreshold / (self.GameClient.tickRate * 1000))
-	if difference >= tolerance then
+	if difference >= tolerance / 2 then
 		for i = 1, difference do
 			self:update()
 			if i > 60 then break end
 		end
-	elseif difference < -tolerance then
+	elseif difference < -tolerance / 2 then
 		self.skipTick = math.abs(difference)
 		if self.skipTick > 100 then self.skipTick = 100 end
 	end

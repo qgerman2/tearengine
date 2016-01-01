@@ -5,7 +5,7 @@ function Server:initialize(address)
 	self.Bridge:Server(address)
 
 	self.Peers = {}
-	self.MessageRate = 1 / 30
+	self.MessageRate = 1 / 20
 	self.MessageTimer = 0
 
 	math.randomseed(os.clock())
@@ -17,7 +17,7 @@ function Server:initialize(address)
 	self.hostMOTD = "PLEASE ACCEPT MY FRIEND REQUEST"
 	self.playersMax = 16
 	self.playersCurrent = 0
-	self.map = "rsc/map.png"
+	self.map = "rsc/map3.png"
 	self.state = "lobby"
 end
 

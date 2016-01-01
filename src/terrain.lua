@@ -3,7 +3,8 @@ Terrain = class("Terrain")
 function Terrain:initialize(b2World, mapFile, debug)
 	self.debug = debug
 	self.rImage = love.image.newImageData(mapFile)
-	self.cImage = love.graphics.newImage(self.rImage)
+	self.cImageChunkSize = 512
+	self.cImageChunks = self:buildImageChunks(self.cImageChunkSize)
 
 	self.b2World = b2World
 	self.b2Body = love.physics.newBody(b2World, 0, 0)
@@ -91,8 +92,21 @@ function Terrain:carve(x, y, radius)
 	end
 end
 
-function Terrain:rebuildImage()
-	self.cImage = love.graphics.newImage(self.rImage)
+function Terrain:buildImageChunks(size)
+	local rImage = self.rImage
+	local chunks = {}
+	local width, height = rImage:getDimensions()
+	local horChunks, verChunks = math.ceil(width / size), math.ceil(height / size)
+	for x = 0, horChunks - 1 do
+		if not chunks[x] then chunks[x] = {} end
+		for y = 0, verChunks - 1 do
+			chunks[x][y] = {}
+			chunks[x][y].rImage = love.image.newImageData(size, size)
+			chunks[x][y].rImage:paste(rImage, 0, 0, x * size, y * size, size, size)
+			chunks[x][y].cImage = love.graphics.newImage(chunks[x][y].rImage)
+		end
+	end
+	return chunks
 end
 
 function Terrain:circlePolygon(x, y, radius, precision)
@@ -149,8 +163,22 @@ function Terrain:checkArea(imageData, x, y, width, height)
 	end
 end
 
-function Terrain:draw()
-	love.graphics.draw(self.cImage, 0, 0)
+function Terrain:draw(cameraX, cameraY)
+	local chunks = self.cImageChunks
+	local size = self.cImageChunkSize
+	local width, height = love.graphics.getDimensions()
+	for x = 0, #chunks do
+		for y = 0, #chunks[x] do
+			--no budget frustum culling
+			local drawX, drawY = x * size, y * size
+			if -cameraX - size < drawX and -cameraY - size < drawY then
+				if -cameraX + width > drawX and -cameraY + height > drawY then
+					local chunk = chunks[x][y]
+					love.graphics.draw(chunk.cImage, drawX, drawY)
+				end
+			end
+		end
+	end
 	if self.debug then
 		local r, g, b, a = love.graphics.getColor()
 		for _, chunk in pairs(self.chunks) do

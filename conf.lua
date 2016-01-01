@@ -5,6 +5,8 @@ function love.conf(t)
 
 	t.window.title = "Tear Engine Pre-Alpha"
 	t.window.vsync = false
+	t.window.width = 1280
+	t.window.height = 720
 
 	t.modules.audio = true
 	t.modules.event = true

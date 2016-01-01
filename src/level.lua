@@ -130,7 +130,8 @@ end
 
 function Level:draw()
 	if client then
-		self.Terrain:draw()
+		local x, y = self.Game.Camera.x, self.Game.Camera.y
+		self.Terrain:draw(x, y)
 		for _, entity in pairs(self.Entities) do
 			if entity then
 				entity:e_draw(self.debug)

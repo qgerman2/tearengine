@@ -12,8 +12,6 @@ function Game:initialize(mapFile, peerID)
 	self.peerID = peerID
 
 	self.Level = Level(self, mapFile)
-
-	self.InputHandler = Input()
 end
 
 function Game:g_tick(t)
@@ -40,9 +38,8 @@ function Game:spawnUnits()
 end
 
 function Game:g_update(dt)
-	self.InputHandler:update(self)
-	if self.update then self:update(dt) end
 	self.tickRateTimer = self.tickRateTimer + dt
+	if self.update then self:update(dt) end
 	while self.tickRateTimer >= self.tickRate do
 		self._tick = self._tick + 1
 		self:g_tick(self.timeStep)

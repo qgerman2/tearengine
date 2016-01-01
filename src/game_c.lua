@@ -11,7 +11,7 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 	self.EventManager = EventManager(self)
 	
 	self.inputRedundancy = 2
-	self.inputBufferSize = 60
+	self.inputBufferSize = 30
 	self.inputBuffer = {}
 
 	if love.system.getOS() == "Android" then
@@ -19,11 +19,12 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 	end
 
 	self.journal = {}
-	self.journalSize = 60 --1 sec
+	self.journalSize = 30 --1 sec
 
 	self._sync = false
 	self._syncInputTick = 0
 
+	self.InputHandler = Input()
 	self.HUD = HUD(self)
 end
 
@@ -157,6 +158,7 @@ function GameClient:processChatOutput(msg)
 end
 
 function GameClient:update(dt)
+	self.InputHandler:update(self)
 	self.HUD:update(dt)
 end
 

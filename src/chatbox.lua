@@ -79,7 +79,7 @@ function Chatbox:draw()
 	love.graphics.clear()
 	local _, lines = self.font:getWrap(table.concat(self.buffer, "\n"), self.width)
 	if #lines > self.lines then
-		love.graphics.translate(0, -self.font:getHeight() * (lines - self.lines))
+		love.graphics.translate(0, -self.font:getHeight() * (#lines - self.lines))
 	end
 	love.graphics.printf(table.concat(self.buffer, "\n"), 2, 0, self.width - 4, "left")
 	love.graphics.origin()
