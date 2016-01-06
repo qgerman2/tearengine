@@ -163,7 +163,14 @@ function Courier:initialize(Bridge, peerID)
 end
 
 function Courier:addMessage(Message)
-	local encoded = mp.pack(Message)
+	local packet = {[0] = Message[0]}
+	for i, v in ipairs(MessageType[Message[0]]) do
+		if Message[v] ~= nil then
+			packet[i] = Message[v]
+		end
+	end
+	--print(inspect(packet))
+	local encoded = mp.pack(packet)
 	local reliable = MessageType[Message[0]].reliable
 	if reliable then
 		table.insert(self.BufferReliable, encoded)
@@ -179,7 +186,7 @@ function Courier:buildPacket()
 	}
 	local packet = {[1] = "", [2] = ""}
 	for i = 1, 2 do
-		for k, msg in ipairs(buffer[i]) do
+		for k, msg in pairs(buffer[i]) do
 			packet[i] = packet[i] .. msg
 			buffer[i][k] = nil
 		end
@@ -195,12 +202,15 @@ function Courier:readPacket(packet, channel)
 		offset, message = mp.unpack(packet, offset)
 		if message then
 			message["type"] = message[0]
-			for i, v in ipairs(message) do
-				message[MessageType[message.type][i]] = message[i]
+			for i, v in pairs(message) do
+				if type(i) == "number" and i ~= 0 then
+					message[MessageType[message.type][i]] = message[i]
+				end
 			end
 			unpackedMessages[#unpackedMessages + 1] = message
 		end
 	until message == nil
+	--print(inspect(unpackedMessages))
 	return unpackedMessages
 end
 

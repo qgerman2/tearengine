@@ -10,7 +10,7 @@ function Bazooka:fire(angle)
 		local x, y = self.owner:getPosition()
 		local vx, vy = utils.speedToVelocity(25, angle)
 		local rocket = Rocket(x + vx, y + vy, self.owner.b2World, self)
-		rocket:setLinearVelocity(vx * 50, vy * 50)
+		rocket:setLinearVelocity(vx * 35, vy * 35)
 		self.owner.Level:addEntity(rocket)
 	end
 end

@@ -116,10 +116,11 @@ function Level:update(t)
 		if entity then
 			entity:e_update(t)
 			if entity.updateHealth then
+				--what the hell?
 				self.Game:broadcastMessage({
 					[0] = MSG.UnitHealth,
-					[1] = entity.id,
-					[2] = entity.health,
+					["entityID"] = entity.id,
+					["health"] = entity.health,
 				})
 				entity.updateHealth = false
 			end

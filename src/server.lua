@@ -17,7 +17,7 @@ function Server:initialize(address)
 	self.hostMOTD = "PLEASE ACCEPT MY FRIEND REQUEST"
 	self.playersMax = 16
 	self.playersCurrent = 0
-	self.map = "rsc/map3.png"
+	self.map = "rsc/map.png"
 	self.state = "lobby"
 end
 
@@ -42,12 +42,12 @@ function Server:onPeerDisconnected(id)
 
 end
 
-function Server:onPeerJoinAccepted(peer, request)
+function Server:peerJoinAccepted(peer, request)
 	peer.Courier:addMessage({
 		[0] = MSG.AcceptJoin,
-		[1] = _version,
-		[2] = peer.id,
-		[3] = self.hostMOTD,
+		["version"] = _version,
+		["peerID"] = peer.id,
+		["hostMOTD"] = self.hostMOTD,
 	})
 	peer.state = "connected"
 	peer.lerp = 100
@@ -58,10 +58,10 @@ function Server:onPeerJoinAccepted(peer, request)
 		if id ~= peer.id then
 			peer.Courier:addMessage({
 				[0] = MSG.UpdatePeer,
-				[1] = p.id,
-				[2] = p.name,
-				[3] = p.playerCount,
-				[4] = p.ready and true or false,
+				["peerID"] = p.id,
+				["peerName"] = p.name,
+				["peerPlayers"] = p.playerCount,
+				["ready"] = p.ready and true or false,
 			})
 		end
 	end
@@ -70,10 +70,10 @@ function Server:onPeerJoinAccepted(peer, request)
 	print("Server: Peer " .. peer.id .. " joined the game")
 end
 
-function Server:onPeerJoinDenied(peer, reason)
+function Server:peerJoinDenied(peer, reason)
 	peer.Courier:addMessage({
 		[0] = MSG.DenyJoin,
-		[1] = reason,
+		["reason"] = reason,
 	})
 	print("Server: Peer " .. peer.id .. " failed to join (Reason: " .. reason .. ")")
 end
@@ -82,10 +82,10 @@ function Server:broadcastPeerState(id)
 	local peer = self.Peers[id]
 	self:broadcastMessage({
 		[0] = MSG.UpdatePeer,
-		[1] = peer.id,
-		[2] = peer.name,
-		[3] = peer.playerCount,
-		[4] = peer.ready and true or false,
+		["peerID"] = peer.id,
+		["peerName"] = peer.name,
+		["peerPlayers"] = peer.playerCount,
+		["ready"] = peer.ready and true or false,
 	})
 end
 
@@ -93,14 +93,14 @@ function Server:sendServerInfo(peer)
 	local passworded = not (self.hostPassword == "") and true or false
 	peer.Courier:addMessage({
 		[0] = MSG.SendInfo,
-		[1] = _version,
-		[2] = self.hostName,
-		[3] = self.hostID,
-		[4] = self.hostType,
-		[5] = passworded,
-		[6] = self.map,
-		[7] = self.playersMax,
-		[8] = self.playersCurrent,
+		["version"] = _version,
+		["hostName"] = self.hostName,
+		["hostID"] = self.hostID,
+		["hostType"] = self.hostType,
+		["hostPassworded"] = passworded,
+		["mapName"] = self.map,
+		["playersMax"] = self.playersMax,
+		["playersCurrent"] = self.playersCurrent,
 	})
 end
 
@@ -116,7 +116,7 @@ function Server:processJoin(request, peer)
 	if versionCheck then
 		if idCheck then
 			if passCheck then
-				self:onPeerJoinAccepted(peer, request)
+				self:peerJoinAccepted(peer, request)
 				return true
 			else
 				denyReason = "Incorrect password"
@@ -127,7 +127,7 @@ function Server:processJoin(request, peer)
 	else
 		denyReason = "Different game version"
 	end
-	self:onPeerJoinDenied(peer, denyReason)
+	self:peerJoinDenied(peer, denyReason)
 end
 
 function Server:toggleReady(peer)
@@ -149,8 +149,8 @@ function Server:startGame()
 	game = self.Game
 	self:broadcastMessage({
 		[0] = MSG.StartGame,
-		[1] = self.map,
-		[2] = "default",
+		["mapName"] = self.map,
+		["schemeName"] = "default",
 	})
 end
 

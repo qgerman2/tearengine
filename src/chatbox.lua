@@ -49,7 +49,7 @@ function Chatbox:sendInput()
 		local courier = self.GameClient.Courier
 		courier:addMessage({
 			[0] = MSG.ChatInput,
-			[1] = self.input,
+			["text"] = self.input,
 		})
 	end
 end

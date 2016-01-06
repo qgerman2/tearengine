@@ -11,14 +11,12 @@ function Unit:initialize(x, y, b2World)
 	self:b2Category({2})
 	self.b2Body:setLinearDamping(0.1)
 	self.b2Body:setFixedRotation(true)
-	self.b2Body:setBullet(true)
 	self.topShape = self:b2Shape(love.physics.newRectangleShape(0, -(self.height / 2 - self.height / 3), self.width, (self.height / 3) * 2))
 	self.topShape.b2Fixture:setFriction(0.5)
 	self.topShape.b2Fixture:setRestitution(0.2)
 	self.topShape.b2Fixture:setDensity(1)
 	self.feetShape = self:b2Shape(love.physics.newRectangleShape(0, self.height / 3, self.width - 2, self.height / 3))
 	self.feetShape.b2Fixture:setSensor(true)
-	self.b2Body:setBullet(true)
 	self.leftSensor = self:b2Shape(love.physics.newRectangleShape(-self.width / 2 - 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
 	self.rightSensor = self:b2Shape(love.physics.newRectangleShape(self.width / 2 + 1, -(self.height / 2 - self.height / 3), 2, (self.height / 3) * 2))
 	self.leftSensor.b2Fixture:setSensor(true)
@@ -98,7 +96,9 @@ function Unit:update(t)
 	if #self.feetShape.contacts >= 1 then
 		self._onGroundExtraTicks = self.onGroundExtraTicks
 		self.onGround = true
-		self.b2Body:setGravityScale(0)
+		if vy >= 0 then
+			self.b2Body:setGravityScale(0)
+		end
 		local x, y = self.b2Body:getPosition()
 		local hy = -1
 		self.b2World:rayCast(x - self.width / 2 + 1, y, x - self.width / 2 + 1, y + self.height / 2 - 1,

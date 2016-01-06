@@ -82,7 +82,7 @@ end
 function Client:requestServerInfo()
 	self.Courier:addMessage({
 		[0] = MSG.QueryInfo,
-		[1] = _version,
+		["version"] = _version,
 	})
 end
 
@@ -103,11 +103,11 @@ function Client:requestJoin(hostID, password)
 	local inputs = love.joystick.getJoystickCount() + 1
 	self.Courier:addMessage({
 		[0] = MSG.AttemptJoin,
-		[1] = _version,
-		[2] = hostID,
-		[3] = inputs,
-		[4] = self.name,
-		[5] = password,
+		["version"] = _version,
+		["hostID"] = hostID,
+		["peerPlayers"] = inputs,
+		["peerName"] = self.name,
+		["password"] = password,
 	})
 end
 
@@ -139,7 +139,7 @@ end
 function Client:toggleReady()
 	self.Courier:addMessage({
 		[0] = MSG.ToggleReady,
-		[1] = _version,
+		["version"] = _version,
 	})
 end
 

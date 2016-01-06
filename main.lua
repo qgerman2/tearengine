@@ -9,12 +9,14 @@ lzw = require("lib.lzw")
 utils = require("lib.utils")
 require("lib.msquares")
 require("lib.rdp")
+inspect = require("lib.inspect")
 
 require("src.bridge")
 require("src.courier")
 
 require("src.server")
 require("src.client")
+require("src.inspector")
 
 require("src.game")
 require("src.game_s")
@@ -72,7 +74,7 @@ function love.keypressed(key)
 			server = Server("*:27015")
 			love.window.setMode(300, 100)
 		elseif key == "c" then
-			client = Client("127.0.0.1:27015")
+			client = Client("192.168.2.20:27015")
 		end
 	elseif client then
 		if key == "r" then

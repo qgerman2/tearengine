@@ -69,25 +69,25 @@ function GameServer:syncEntityCreation(entity, id)
 	if entity.projectile then
 		self:broadcastMessage({
 			[0] = MSG.ProjectileFire,
-			[1] = self._tick,
-			[2] = entity.source.owner.peerID,
-			[3] = id,
-			[4] = entity.class.name,
-			[5] = entity.x,
-			[6] = entity.y,
-			[7] = entity.vx,
-			[8] = entity.vy,
+			["tick"] = self._tick,
+			["peerID"] = entity.source.owner.peerID,
+			["entityID"] = id,
+			["kind"] = entity.class.name,
+			["x"] = entity.x,
+			["y"] = entity.y,
+			["vx"] = entity.vx,
+			["vy"] = entity.vy,
 		})
 	else
 		self:broadcastMessage({
 			[0] = MSG.SyncEntityCreate,
-			[1] = self._tick,
-			[2] = id,
-			[3] = entity.class.name,
-			[4] = entity.x,
-			[5] = entity.y,
-			[6] = entity.vx,
-			[7] = entity.vy,
+			["tick"] = self._tick,
+			["entityID"] = id,
+			["kind"] = entity.class.name,
+			["x"] = entity.x,
+			["y"] = entity.y,
+			["vx"] = entity.vx,
+			["vy"] = entity.vy,
 		})
 	end
 end
@@ -95,20 +95,20 @@ end
 function GameServer:syncEntityRemoval(entity, id)
 	self:broadcastMessage({
 		[0] = MSG.SyncEntityRemove,
-		[1] = self._tick,
-		[2] = id,
+		["tick"] = self._tick,
+		["entityID"] = id,
 	})
 end
 
 function GameServer:sendLevelSnapshot()
 	self:broadcastMessage({
 		[0] = MSG.SyncTick,
-		[1] = self._tick,
+		["tick"] = self._tick,
 	})
 	for destPeerID, destPeer in pairs(self.Peers) do
 		destPeer.Courier:addMessage({
 			[0] = MSG.SyncTickPredict,
-			[1] = destPeer.tick,
+			["tick"] = destPeer.tick,
 		})
 		for entityID, entity in pairs(self.Level.Entities) do
 			if entity then
@@ -125,40 +125,40 @@ function GameServer:sendLevelSnapshot()
 					if peerID == destPeerID then
 						destPeer.Courier:addMessage({
 							[0] = MSG.SyncEntityPredict,
-							[1] = entityID,
-							[2] = x,
-							[3] = y,
-							[4] = r,
-							[5] = vx,
-							[6] = vy,
-							[7] = vr,
+							["entityID"] = entityID,
+							["x"] = x,
+							["y"] = y,
+							["r"] = r,
+							["vx"] = vx,
+							["vy"] = vy,
+							["vr"] = vr,
 						})
 					else
 						destPeer.Courier:addMessage({
 							[0] = MSG.SyncEntity,
-							[1] = entityID,
-							[2] = self._tick,
-							[3] = x,
-							[4] = y,
-							[5] = r,
-							[6] = vx,
-							[7] = vy,
-							[8] = vr
+							["entityID"] = entityID,
+							["tick"] = self._tick,
+							["x"] = x,
+							["y"] = y,
+							["r"] = r,
+							["vx"] = vx,
+							["vy"] = vy,
+							["vr"] = vr
 						})
 						if player.input then
 							destPeer.Courier:addMessage({
 								[0] = MSG.SendInput,
-								[1] = peerID,
-								[2] = playerID,
-								[3] = self._tick,
-								[4] = player.input.aim,
-								[5] = player.input.jump,
-								[6] = player.input.left,
-								[7] = player.input.right,
-								[8] = player.input.down,
-								[9] = player.input.fire1,
-								[10] = player.input.fire2,
-								[11] = player.input.cancel
+								["peerID"] = peerID,
+								["playerID"] = playerID,
+								["tick"] = self._tick,
+								["aim"] = player.input.aim,
+								["jump"] = player.input.jump,
+								["left"] = player.input.left,
+								["right"] = player.input.right,
+								["down"] = player.input.down,
+								["fire1"] = player.input.fire1,
+								["fire2"] = player.input.fire2,
+								["cancel"] = player.input.cancel
 							})
 						end
 					end
@@ -171,25 +171,25 @@ function GameServer:sendLevelSnapshot()
 						if entity.source.owner.peerID == destPeerID then
 							destPeer.Courier:addMessage({
 								[0] = MSG.SyncEntity,
-								[1] = entityID,
-								[2] = self._tick,
-								[3] = x,
-								[4] = y,
-								[5] = r,
-								[6] = vx,
-								[7] = vy,
-								[8] = vr,
+								["entityID"] = entityID,
+								["tick"] = self._tick,
+								["x"] = x,
+								["y"] = y,
+								["r"] = r,
+								["vx"] = vx,
+								["vy"] = vy,
+								["vr"] = vr,
 							})
 						else
 							destPeer.Courier:addMessage({
 								[0] = MSG.SyncEntityPredict,
-								[1] = entityID,
-								[2] = x,
-								[3] = y,
-								[4] = r,
-								[5] = vx,
-								[6] = vy,
-								[7] = vr,
+								["entityID"] = entityID,
+								["x"] = x,
+								["y"] = y,
+								["r"] = r,
+								["vx"] = vx,
+								["vy"] = vy,
+								["vr"] = vr,
 							})
 						end
 					end
@@ -203,8 +203,8 @@ function GameServer:processChatInput(msg, peer)
 	local text, peerID = self:parseChatInput(peer, msg.text)
 	self:broadcastMessage({
 		[0] = MSG.ChatOutput,
-		[1] = peerID,
-		[2] = text,
+		["peerID"] = peerID,
+		["text"] = text,
 	})
 end
 

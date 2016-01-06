@@ -67,12 +67,12 @@ function Input:snapshot(tick)
 	for i = 1, #self.inputState do
 		IS[i] = {
 			[0] = MSG.SendInput,
-			[1] = client.id,
-			[2] = i,
-			[3] = tick,
+			["peerID"] = client.id,
+			["playerID"] = i,
+			["tick"] = tick,
 		}
 		for ii = 1, #self.actionSequence do
-			IS[i][ii + 3] = self.inputState[i][self.actionSequence[ii]]
+			IS[i][self.actionSequence[ii]] = self.inputState[i][self.actionSequence[ii]]
 		end
 	end
 	return IS
