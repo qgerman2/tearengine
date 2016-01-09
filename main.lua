@@ -7,9 +7,10 @@ class = require("lib.middleclass")
 clipper = require("lib.clipper")
 lzw = require("lib.lzw")
 utils = require("lib.utils")
+inspect = require("lib.inspect")
 require("lib.msquares")
 require("lib.rdp")
-inspect = require("lib.inspect")
+
 
 require("src.bridge")
 require("src.courier")

@@ -93,9 +93,8 @@ local MessageType = {
 		"vy",
 		"vr",
 	},
-		["11"] = {			--unit snapshot			(Server)
+	["11"] = {			--unit snapshot			(Server)
 		"entityID",
-		"tick",
 		"x",
 		"y",
 		"r",
@@ -194,7 +193,7 @@ function Courier:buildPacket()
 	return {packet[1], packet[2]}
 end
 
-function Courier:readPacket(packet, channel)
+function Courier:readPacket(packet, channel, time)
 	local unpackedMessages = {}
 	local offset = 0
 	repeat
@@ -207,10 +206,10 @@ function Courier:readPacket(packet, channel)
 					message[MessageType[message.type][i]] = message[i]
 				end
 			end
+			message.localTime = time
 			unpackedMessages[#unpackedMessages + 1] = message
 		end
 	until message == nil
-	--print(inspect(unpackedMessages))
 	return unpackedMessages
 end
 

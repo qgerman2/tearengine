@@ -19,7 +19,7 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 	end
 
 	self.journal = {}
-	self.journalSize = 30 --1 sec
+	self.journalSize = 30
 
 	self._sync = false
 	self._syncInputTick = 0
@@ -84,17 +84,17 @@ function GameClient:processMessage(msg)
 end
 
 function GameClient:setServerTick(msg)
-	if love.timer.getDelta() > 1 / 30 then return end
+	if msg.localTime < os.clock() - 1 / 20 then return end
 	self.EventManager:setServerTick(msg.tick)
 end
 
 function GameClient:setPredictTick(msg)
-	if love.timer.getDelta() > 1 / 30 then return end
+	if msg.localTime < os.clock() - 1 / 20 then return end
 	self._syncInputTick = msg.tick
 end
 
 function GameClient:checkEntitySync(msg)
-	if love.timer.getDelta() > 1 / 30 then return end
+	if msg.localTime < os.clock() - 1 / 20 then return end
 	local tick = self._syncInputTick
 	for i = 1, #self.journal do
 		local snapshotA = self.journal[i]

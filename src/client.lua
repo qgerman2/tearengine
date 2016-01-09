@@ -163,6 +163,9 @@ function Client:processMessages(msgs)
 end
 
 function Client:update(dt)
+	if self.state == "ingame" then
+		self.Game:g_update(dt)
+	end
 	local events = self.Bridge:CheckEvents()
 	if events then
 		for i = 1, #events do
@@ -171,13 +174,10 @@ function Client:update(dt)
 				print("Client: Connected")
 				self:requestServerInfo()
 			elseif event.type == "receive" then
-				local msgs = self.Courier:readPacket(event.data, event.channel)
+				local msgs = self.Courier:readPacket(event.data, event.channel, event.time)
 				self:processMessages(msgs)
 			end
 		end
-	end
-	if self.state == "ingame" then
-		self.Game:g_update(dt)
 	end
 	self.MessageTimer = self.MessageTimer + dt
 	while self.MessageTimer >= self.MessageRate do

@@ -59,10 +59,10 @@ function EventManager:PlayerInput(eventData)
 end
 
 function EventManager:EntityUpdate(eventData)
-	if eventData.tick <= self.displayTick then return end
+	if self.serverTick <= self.displayTick then return end
 	local event = {
 		type = "EntityUpdate",
-		tick = eventData.tick,
+		tick = self.serverTick,
 		entityID = eventData.entityID,
 		x = eventData.x,
 		y = eventData.y,
@@ -98,7 +98,7 @@ function EventManager:EntityDestruction(eventData)
 		id = eventData.entityID,
 	}
 	if event.tick <= self.displayTick then
-		event.tick = self.displayTick + 1
+		event.tick = self.displayTick + 2
 	end
 	return event
 end

@@ -137,7 +137,6 @@ function GameServer:sendLevelSnapshot()
 						destPeer.Courier:addMessage({
 							[0] = MSG.SyncEntity,
 							["entityID"] = entityID,
-							["tick"] = self._tick,
 							["x"] = x,
 							["y"] = y,
 							["r"] = r,
@@ -172,7 +171,6 @@ function GameServer:sendLevelSnapshot()
 							destPeer.Courier:addMessage({
 								[0] = MSG.SyncEntity,
 								["entityID"] = entityID,
-								["tick"] = self._tick,
 								["x"] = x,
 								["y"] = y,
 								["r"] = r,

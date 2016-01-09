@@ -41,6 +41,7 @@ while true do
 				type = event.type,
 				data = event.data,
 				peer = event.peer:index(),
+				time = os.clock(),
 			}
 			EventChannel:push(t)
 		end
