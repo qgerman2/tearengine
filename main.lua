@@ -17,7 +17,7 @@ require("src.courier")
 
 require("src.server")
 require("src.client")
-require("src.inspector")
+require("src.vacuum")
 
 require("src.game")
 require("src.game_s")
@@ -75,7 +75,7 @@ function love.keypressed(key)
 			server = Server("*:27015")
 			love.window.setMode(300, 100)
 		elseif key == "c" then
-			client = Client("192.168.2.20:27015")
+			client = Client("190.164.25.53:27015")
 		end
 	elseif client then
 		if key == "r" then

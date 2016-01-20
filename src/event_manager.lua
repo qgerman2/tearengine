@@ -3,7 +3,7 @@ EventManager = class("EventManager")
 function EventManager:initialize(gameClient)
 	self.GameClient = gameClient
 	self.delay = 33.3
-	self.jitterThreshold = 33.3 --ms
+	self.jitterThreshold = 16.6 --ms
 	self.displayTick = 0
 	self.serverTick = 0
 	self.skipTick = 0
@@ -11,8 +11,8 @@ function EventManager:initialize(gameClient)
 	self.Events = {}
 
 	self.EventPriority = {
-		["EntityDestruction"] = 1,
-		["EntityCreation"] = 2,
+		["EntityCreation"] = 1,
+		["EntityDestruction"] = 2,
 		["EntityUpdate"] = 3,
 		["PlayerInput"] = 4
 	}
@@ -98,7 +98,7 @@ function EventManager:EntityDestruction(eventData)
 		id = eventData.entityID,
 	}
 	if event.tick <= self.displayTick then
-		event.tick = self.displayTick + 2
+		event.tick = self.displayTick + 1
 	end
 	return event
 end

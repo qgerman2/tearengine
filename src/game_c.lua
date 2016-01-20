@@ -109,7 +109,7 @@ function GameClient:checkEntitySync(msg)
 								utils.round(entity.vr) == utils.round(msg.vr)
 				if not sync then
 					self._sync = tick
-					print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
+					--print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
 					snapshotA:overwriteEntity(msg)
 					for ii = i - 1, 1, -1 do
 						local snapshotB = self.journal[ii]

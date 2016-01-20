@@ -35,7 +35,7 @@ function Terrain:getImageContour(image)
 		for y = 0, image:getHeight() - 1 do
 			if self:checkArea(image, x - 1, y - 1, 2, 2) == "half" then
 				local msquares = marchingSquares(image, x, y)
-				local points = RDPAlgorithm(msquares.points, 1.2)
+				local points = RDPAlgorithm(msquares.points, 1)
 				local rawPoints = {}
 				for i = 1, #points do
 					table.insert(rawPoints, points[i].x)

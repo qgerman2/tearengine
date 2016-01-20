@@ -154,8 +154,9 @@ local MessageType = {
 
 Courier = class("Courier")
 
-function Courier:initialize(Bridge, peerID)
+function Courier:initialize(Bridge, peerID, Vacuum)
 	self.Bridge = Bridge
+	self.Vacuum = Vacuum or nil
 	self.peerID = peerID or nil
 	self.BufferReliable = {}
 	self.BufferUnreliable = {}
@@ -168,12 +169,14 @@ function Courier:addMessage(Message)
 			packet[i] = Message[v]
 		end
 	end
-	--print(inspect(packet))
 	local encoded = mp.pack(packet)
 	local reliable = MessageType[Message[0]].reliable
 	if reliable then
 		table.insert(self.BufferReliable, encoded)
 	else
+		if Message["entityID"] then
+			if not self.Vacuum:check(Message["entityID"]) then return end
+		end
 		table.insert(self.BufferUnreliable, encoded)
 	end
 end

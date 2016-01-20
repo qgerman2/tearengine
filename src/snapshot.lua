@@ -29,30 +29,19 @@ function Snapshot:initialize(level)
 end
 
 function Snapshot:apply(level)
-	--remove unnecessary entities
-	for i, ent in pairs(level.Entities) do
-		if ent then
-			if not ent.persist and not self.Entities[i] then
-				level:removeEntity(i)
-			end
-		end
-	end
-	--apply changes
 	for i, ent in pairs(self.Entities) do
 		local entity = level.Entities[i]
-		if not entity then
-			entity = _G[ent.kind](ent.x, ent.y, level.b2World)
-			level:addEntity(entity, i)
-		end
-		if ent.x and ent.y then
-			entity:setPosition(ent.x, ent.y)
-			entity:setAngle(ent.r)
-			entity:setLinearVelocity(ent.vx, ent.vy)
-			entity:setAngularVelocity(ent.vr)
-		end
-		if entity.class.name == "Unit" then
-			for action, state in pairs(ent.input) do
-				entity.input[action] = state
+		if entity then
+			if ent.x and ent.y then
+				entity:setPosition(ent.x, ent.y)
+				entity:setAngle(ent.r)
+				entity:setLinearVelocity(ent.vx, ent.vy)
+				entity:setAngularVelocity(ent.vr)
+			end
+			if entity.class.name == "Unit" then
+				for action, state in pairs(ent.input) do
+					entity.input[action] = state
+				end
 			end
 		end
 	end

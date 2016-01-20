@@ -3,9 +3,10 @@ Server = class("Server")
 function Server:initialize(address)
 	self.Bridge = Bridge()
 	self.Bridge:Server(address)
+	self.Vacuum = Vacuum()
 
 	self.Peers = {}
-	self.MessageRate = 1 / 20
+	self.MessageRate = 1 / 30
 	self.MessageTimer = 0
 
 	math.randomseed(os.clock())
@@ -30,7 +31,7 @@ end
 function Server:onPeerConnected(id)
 	--Just connected, do not trust yet
 	self.Peers[id] = {
-		["Courier"] = Courier(self.Bridge, id),
+		["Courier"] = Courier(self.Bridge, id, self.Vacuum),
 		["id"] = id,
 		["name"] = "unnamed",
 		["state"] = "handshake",
