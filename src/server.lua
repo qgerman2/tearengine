@@ -1,8 +1,8 @@
 Server = class("Server")
 
-function Server:initialize(address)
+function Server:initialize(address, listen)
 	self.Bridge = Bridge()
-	self.Bridge:Server(address)
+	self.Bridge:Server(address, listen)
 	self.Vacuum = Vacuum()
 
 	self.Peers = {}
@@ -13,7 +13,7 @@ function Server:initialize(address)
 	self.hostID = tostring(math.random(10000, 99999)) --legit
 
 	self.hostPassword = "robofortune"
-	self.hostType = "dedicated"
+	self.hostType = listen and "listen" or "dedicated"
 	self.hostName = "test server"
 	self.hostMOTD = "PLEASE ACCEPT MY FRIEND REQUEST"
 	self.playersMax = 16
@@ -37,10 +37,14 @@ function Server:onPeerConnected(id)
 		["state"] = "handshake",
 		["ready"] = true,
 	}
+	print("Server: Peer " .. id .. " connected")
 end
 
 function Server:onPeerDisconnected(id)
-
+	if self.state == "ingame" then
+		self.Game:onPeerLeft(self.Peers[id])
+	end
+	print("Server: Peer " .. id .. " disconnected")
 end
 
 function Server:peerJoinAccepted(peer, request)
@@ -68,7 +72,15 @@ function Server:peerJoinAccepted(peer, request)
 	end
 	--Notify everyone
 	self:broadcastPeerState(peer.id)
-	print("Server: Peer " .. peer.id .. " joined the game")
+	if self.state == "ingame" then
+		peer.Courier:addMessage({
+			[0] = MSG.StartGame,
+			["mapName"] = self.map,
+			["schemeName"] = "default",
+		})
+		self.Game:spawnUnits()
+		self.Game:onPeerJoined(peer)
+	end
 end
 
 function Server:peerJoinDenied(peer, reason)
@@ -173,7 +185,6 @@ function Server:update(dt)
 			local event = events[i]
 			--print(event.data)
 			if event.type == "connect" then
-				print("Server: Peer " .. event.peer .. " connected")
 				self:onPeerConnected(event.peer)
 			elseif event.type == "receive" then
 				local peer = self.Peers[event.peer]

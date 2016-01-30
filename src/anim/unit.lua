@@ -1,6 +1,6 @@
-UnitAnimator = class("UnitAnimator")
+UnitAnim = class("UnitAnim")
 
-function UnitAnimator:initialize(unit)
+function UnitAnim:initialize(unit)
 	self.unit = unit
 	self.timer = 0
 	self.sprites = love.graphics.newImage("rsc/unit/skin1.png")
@@ -28,16 +28,17 @@ function UnitAnimator:initialize(unit)
 	
 	self.anim = "idle"
 	self.key = 1
+	self.armyoffset = 0
 end
 
-function UnitAnimator:set(anim)
+function UnitAnim:set(anim)
 	self.anim = anim
 	if self.key > #self.frames[anim] then
 		self.key = 1
 	end
 end
 
-function UnitAnimator:update(dt)
+function UnitAnim:update(dt)
 	local input = self.unit.input
 	if not self.unit.onGround or input["left"] or input["right"] then
 		self:set("run")
@@ -55,7 +56,7 @@ function UnitAnimator:update(dt)
 	end
 end
 
-function UnitAnimator:draw()
+function UnitAnim:draw(weapon)
 	local x, y = self.unit.b2Body:getPosition()
 	local w, h = self.unit.width, self.unit.height
 	local quad = self.quads[self.anim][self.key]
@@ -76,6 +77,13 @@ function UnitAnimator:draw()
 	
 	--Cuerpo
 	love.graphics.draw(self.sprites, quad, x, y + h / 2, 0, xscaling, 1, self.frameWidth / 2, self.frameHeight)
+
+	--for drawing weapons
+	self.xscaling = xscaling
+	self.armyoffset = armyoffset
+
+	--Arma
+	weapon.anim:draw()
 	
 	--Brazo1
 	love.graphics.draw(self.sprites, self.arms[1].quad, x, y - 7 + armyoffset, angle + math.pi, 1, xscaling, 10, 2)

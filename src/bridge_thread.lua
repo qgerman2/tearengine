@@ -18,7 +18,11 @@ while true do
 		elseif command.type == "server" then
 			Host = enet.host_create(command.data, 16, 2)
 			Host:compress_with_range_coder()
-			print("Bridge: Server")
+			if command.listen then
+				print("Bridge: Listen Server")
+			else
+				print("Bridge: Dedicated Server")
+			end
 		elseif command.type == "send" then
 			local Peer = Server or false
 			if command.peer then

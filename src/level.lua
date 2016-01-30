@@ -36,22 +36,21 @@ function Level:removeEntity(id)
 	self.Entities[id] = false
 end
 
-function Level:explosion(x, y, radius)
+function Level:carveTerrain(x, y, radius)
 	local explosion = {
 		kind = "carve",
 		x = x,
 		y = y,
-		mod = radius,
+		radius = radius,
 	}
 	table.insert(self.TerrainDeformations, explosion)
 	if server then
 		local eMessage = {
-			["type"] = "15",
-			[1] = self.Game.ticks,
-			[2] = "carve",
-			[3] = x,
-			[4] = y,
-			[5] = radius,
+			[0] = MSG.CarveTerrain,
+			["tick"] = self.Game.ticks,
+			["x"] = x,
+			["y"] = y,
+			["radius"] = radius,
 		}
 		self.Game:broadcastMessage(eMessage)
 	end
@@ -61,14 +60,11 @@ function Level:parseTerrainDeformations()
 	local modified = false
 	for k, data in pairs(self.TerrainDeformations) do
 		modified = true
-		if data.kind == "carve" then
-			self.Terrain:carve(data.x, data.y, data.mod)
-			self.tTerrain:carve(data.x, data.y, data.mod)
-		end
+		self.Terrain:carve(data.x, data.y, data.radius)
 		self.TerrainDeformations[k] = nil
 	end
 	if modified then
-		self.Terrain:rebuildImage()
+		self.Terrain:buildImageChunks(self.Terrain.cImageChunkSize)
 	end
 end
 
@@ -130,8 +126,7 @@ function Level:update(t)
 end
 
 function Level:draw()
-	--if client then
-	if true then
+	if client then
 		local x, y = self.Game.Camera.x, self.Game.Camera.y
 		self.Terrain:draw(x, y)
 		for _, entity in pairs(self.Entities) do

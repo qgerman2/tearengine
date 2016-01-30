@@ -19,6 +19,9 @@ MSG = {							--Reliable
 	UnitHealth			= "17",
 	ChatInput			= "18", --*
 	ChatOutput			= "19", --*
+	CarveTerrain		= "20", --*
+	PeerJoined			= "21", --*
+	PeerLeft			= "22", --*
 }
 
 local MessageType = {
@@ -148,6 +151,21 @@ local MessageType = {
 	["19"] = {
 		"peerID",
 		"text",
+		reliable = true,
+	},
+	["20"] = {
+		"tick",
+		"x",
+		"y",
+		"radius",
+		reliable = true,
+	},
+	["21"] = {
+		"peerID",
+		reliable = true,
+	},
+	["22"] = {
+		"peerID",
 		reliable = true,
 	},
 }

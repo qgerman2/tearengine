@@ -6,8 +6,8 @@ function Chatbox:initialize(GameClient, font)
 	self.focus = false
 	self.x = 10
 	self.y = 10
-	self.width = 250
-	self.height = 86
+	self.width = 300
+	self.height = 120
 	self.lines = 6
 	self.canvas = love.graphics.newCanvas(self.width, self.height)
 	self.buffer = {

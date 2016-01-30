@@ -13,8 +13,9 @@ function EventManager:initialize(gameClient)
 	self.EventPriority = {
 		["EntityCreation"] = 1,
 		["EntityDestruction"] = 2,
-		["EntityUpdate"] = 3,
-		["PlayerInput"] = 4
+		["CarveTerrain"] = 3,
+		["EntityUpdate"] = 4,
+		["PlayerInput"] = 5
 	}
 end
 
@@ -33,7 +34,8 @@ function EventManager:event(eventData)
 	elseif type == MSG.SyncEntityPredict then newEvent = self:EntityCreation(eventData)
 	elseif type == MSG.SyncEntityPosition then newEvent = self:EntityUpdate(eventData)
 	elseif type == MSG.SyncEntityRemove then newEvent = self:EntityDestruction(eventData)
-	elseif type == MSG.ProjectileFire then newEvent = self:ProjectileFire(eventData) end
+	elseif type == MSG.ProjectileFire then newEvent = self:ProjectileFire(eventData)
+	elseif type == MSG.CarveTerrain then newEvent = self:CarveTerrain(eventData) end
 	if newEvent then
 		table.insert(self.Events, 1, newEvent)
 	end
@@ -72,6 +74,11 @@ function EventManager:EntityUpdate(eventData)
 		vr = eventData.vr,
 	}
 	return event
+end
+
+function EventManager:CarveTerrain(eventData)
+	self.GameClient.Level.Terrain:carve(eventData.x, eventData.y, eventData.radius)
+	self.GameClient.Level.Terrain:buildImageChunks(self.GameClient.Level.Terrain.cImageChunkSize)
 end
 
 function EventManager:EntityCreation(eventData)
@@ -132,7 +139,7 @@ function EventManager:ProjectileFire(eventData)
 			snapshotA:apply(game.Level)
 			game.Level:update(0)
 			snapshotA:apply(game.Level)
-			game.Level:update(game.tickRate)
+			game.Level:update(game.timeStep)
 			local b2World = game.Level.b2World
 			local entity = _G[eventData.kind](eventData.x, eventData.y, b2World)
 			temp = entity
@@ -145,7 +152,7 @@ function EventManager:ProjectileFire(eventData)
 				game._tick = snapshotB.tick
 				game.journal[ii] = Snapshot(game.Level)
 				if ii ~= 1 then
-					game.Level:update(game.tickRate)
+					game.Level:update(game.timeStep)
 				end
 			end
 		end
@@ -176,7 +183,7 @@ function EventManager:calculateDelay()
 	if difference >= tolerance / 2 then
 		for i = 1, difference do
 			self:update()
-			if i > 60 then break end
+			if i > 120 then break end
 		end
 	elseif difference < -tolerance / 2 then
 		self.skipTick = math.abs(difference)
@@ -194,10 +201,10 @@ function EventManager:update()
 			if event.type == "EntityUpdate" then
 				local entity = level.Entities[event.entityID]
 				if entity then
-					entity:setPosition(event.x, event.y)
-					entity:setAngle(event.r)
-					entity:setLinearVelocity(event.vx, event.vy)
-					entity:setAngularVelocity(event.vr)
+					entity.b2Body:setPosition(event.x, event.y)
+					entity.b2Body:setAngle(event.r)
+					entity.b2Body:setLinearVelocity(event.vx, event.vy)
+					entity.b2Body:setAngularVelocity(event.vr)
 				end
 			elseif event.type == "EntityCreation" then
 				local b2World = self.GameClient.Level.b2World

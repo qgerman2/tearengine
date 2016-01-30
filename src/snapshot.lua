@@ -5,10 +5,10 @@ function Snapshot:initialize(level)
 	self.Entities = {}
 	for id, entity in pairs(level.Entities) do
 		if entity then
-			local x, y = entity:getPosition()
-			local r = entity:getAngle()
-			local vx, vy = entity:getLinearVelocity()
-			local vr = entity:getAngularVelocity()
+			local x, y = entity.b2Body:getPosition()
+			local r = entity.b2Body:getAngle()
+			local vx, vy = entity.b2Body:getLinearVelocity()
+			local vr = entity.b2Body:getAngularVelocity()
 			self.Entities[id] = {
 				kind = entity.class.name,
 				x = x,
@@ -33,10 +33,10 @@ function Snapshot:apply(level)
 		local entity = level.Entities[i]
 		if entity then
 			if ent.x and ent.y then
-				entity:setPosition(ent.x, ent.y)
-				entity:setAngle(ent.r)
-				entity:setLinearVelocity(ent.vx, ent.vy)
-				entity:setAngularVelocity(ent.vr)
+				entity.b2Body:setPosition(ent.x, ent.y)
+				entity.b2Body:setAngle(ent.r)
+				entity.b2Body:setLinearVelocity(ent.vx, ent.vy)
+				entity.b2Body:setAngularVelocity(ent.vr)
 			end
 			if entity.class.name == "Unit" then
 				for action, state in pairs(ent.input) do

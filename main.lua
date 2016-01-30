@@ -7,10 +7,8 @@ class = require("lib.middleclass")
 clipper = require("lib.clipper")
 lzw = require("lib.lzw")
 utils = require("lib.utils")
-inspect = require("lib.inspect")
 require("lib.msquares")
 require("lib.rdp")
-
 
 require("src.bridge")
 require("src.courier")
@@ -19,6 +17,7 @@ require("src.server")
 require("src.client")
 require("src.vacuum")
 
+require("src.menu")
 require("src.game")
 require("src.game_s")
 require("src.game_c")
@@ -34,11 +33,14 @@ require("src.event_manager")
 require("src.snapshot")
 require("src.entity")
 require("src.unit")
-require("src.unit_animator")
 
 require("src.weapon")
 require("src.rocket")
 require("src.bazooka")
+
+require("src.anim.unit")
+require("src.anim.bazooka")
+require("src.anim.rocket")
 
 function love.load()
 	_version = "0.1"
@@ -70,12 +72,12 @@ end
 
 function love.keypressed(key)
 	if client then client:keyPressed(key) end
-	if not server and not client then
+	if not server and not client and not listen then
 		if key == "s" then
 			server = Server("*:27015")
 			love.window.setMode(300, 100)
 		elseif key == "c" then
-			client = Client("190.164.25.53:27015")
+			client = Client("127.0.0.1:27015")
 		end
 	elseif client then
 		if key == "r" then
@@ -105,4 +107,9 @@ end
 function love.draw()
 	if game then game:g_draw() end
 	if client then client:draw() end
+end
+
+function love.threaderror(thread, errorstr)
+  print("Thread error!\n"..errorstr)
+  -- thread:getError() will return the same error string now.
 end

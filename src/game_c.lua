@@ -4,9 +4,10 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 	Game.initialize(self, mapFile, peerID)
 	self.Peers = Peers
 	self.Courier = Courier
-	self:spawnUnits()
 
 	self.localPeer = self.Peers[peerID]
+
+	self:spawnUnits()
 
 	self.EventManager = EventManager(self)
 	
@@ -19,13 +20,23 @@ function GameClient:initialize(mapFile, Peers, peerID, Courier)
 	end
 
 	self.journal = {}
-	self.journalSize = 30
+	self.journalSize = 60
 
 	self._sync = false
 	self._syncInputTick = 0
 
 	self.InputHandler = Input()
 	self.HUD = HUD(self)
+end
+
+function GameClient:onPeerJoined(msg)
+	local peerID = msg.peerID
+	self:spawnUnits()
+end
+
+function GameClient:onPeerLeft(msg)
+	local peer = self.Peers[msg.peerID]
+	self.Peers[msg.peerID] = nil
 end
 
 function GameClient:preTick(t)
@@ -38,8 +49,8 @@ function GameClient:preTick(t)
 end
 
 function GameClient:postTick(t)
-	self.Camera:update(0.01)
-	self.Camera:setTarget(self.localPeer.Players[1].unit:getPosition())
+	self.Camera:update(self.timeStep)
+	--self.Camera:setTarget(self.localPeer.Players[1].unit.b2Body:getPosition())
 	table.insert(self.journal, 1, Snapshot(self.Level))
 	if #self.journal > self.journalSize then
 		self.journal[self.journalSize + 1] = nil
@@ -51,6 +62,7 @@ function GameClient:prePacket(MessageRate)
 end
 
 function GameClient:sendInput(snapshots)
+	if not self.localPeer or not self.localPeer.Players then return end
 	for id, player in pairs(self.localPeer.Players) do
 		for i = utils.round(snapshots) + self.inputRedundancy, 1, -1 do
 			local inputState = self.inputBuffer[i]
@@ -67,8 +79,10 @@ function GameClient:processInput(t)
 	if #self.inputBuffer > self.inputBufferSize then
 		self.inputBuffer[self.inputBufferSize + 1] = nil
 	end
-	for id, player in pairs(self.localPeer.Players) do
-		player.unit:applyInput(inputSnapshot[id])
+	if self.localPeer and self.localPeer.Players then
+		for id, player in pairs(self.localPeer.Players) do
+			player.unit:applyInput(inputSnapshot[id])
+		end
 	end
 end
 
@@ -78,6 +92,8 @@ function GameClient:processMessage(msg)
 	elseif msg.type == MSG.SyncTickPredict then self:setPredictTick(msg)
 	elseif msg.type == MSG.UnitHealth then self:updateUnitHealth(msg)
 	elseif msg.type == MSG.ChatOutput then self:processChatOutput(msg)
+	elseif msg.type == MSG.PeerJoined then self:onPeerJoined(msg)
+	elseif msg.type == MSG.PeerLeft then self:onPeerLeft(msg)
 	else
 		self.EventManager:event(msg) 
 	end
@@ -109,7 +125,7 @@ function GameClient:checkEntitySync(msg)
 								utils.round(entity.vr) == utils.round(msg.vr)
 				if not sync then
 					self._sync = tick
-					--print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
+					print("Prediction error, diff " .. utils.dist(entity.x, entity.y, msg.x, msg.y))
 					snapshotA:overwriteEntity(msg)
 					for ii = i - 1, 1, -1 do
 						local snapshotB = self.journal[ii]
@@ -127,16 +143,14 @@ function GameClient:fixEntitySync(tick)
 		local snapshotA = self.journal[i]
 		if snapshotA.tick + 1 == tick then
 			snapshotA:apply(self.Level)
-			self.Level:update(0)
-			snapshotA:apply(self.Level)
-			self.Level:update(self.tickRate)
+			self.Level:update(self.timeStep)
 			for ii = i - 1, 1, -1 do
 				local snapshotB = self.journal[ii]
 				snapshotB:apply(self.Level)
 				self._tick = snapshotB.tick
 				self.journal[ii] = Snapshot(self.Level)
 				if ii ~= 1 then
-					self.Level:update(self.tickRate)
+					self.Level:update(self.timeStep)
 				end
 			end
 		end

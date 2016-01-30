@@ -201,7 +201,7 @@ function Input:update(game)
 							self.inputState[id]["right"] = 1
 						end
 					end
-					local x, y = players[id].unit:getPosition()
+					local x, y = players[id].unit.b2Body:getPosition()
 					local px, py = camera:worldToScreen(x, y)
 					local mx, my = 0, 0
 					if love.system.getOS() == "Android" then

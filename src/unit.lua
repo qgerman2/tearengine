@@ -2,7 +2,7 @@ Unit = class("Unit", Entity)
 
 function Unit:initialize(x, y, b2World)
 	Entity.initialize(self, x, y)
-	self.anim = UnitAnimator(self)
+	self.anim = UnitAnim(self)
 
 	self.width = 10
 	self.height = 30
@@ -36,12 +36,9 @@ function Unit:initialize(x, y, b2World)
 	self.airAcceleration = 10
 	self.direction = "right"
 
-	self.weapons = {["Bazooka"] = Bazooka(self)}
+	self.inventory = {["Bazooka"] = Bazooka(self)}
 
-	self.equipped = {
-		[1] = self.weapons["Bazooka"],
-		[2] = self.weapons["Rope"],
-	}
+	self.weapon = self.inventory["Bazooka"]
 
 	self.input = {
 		aim = 0,
@@ -86,7 +83,7 @@ function Unit:update(t)
 	self.feetShape.b2Fixture:setRestitution(0)
 	self.topShape.b2Fixture:setRestitution(0)
 
-	self.equipped[1]:wep_update(t)
+	self.weapon:wep_update(t)
 
 	local mass = self.b2Body:getMass()
 	local vx, vy = self.b2Body:getLinearVelocity()
@@ -155,11 +152,12 @@ function Unit:update(t)
 		end
 	end
 	if self.input["fire1"] then
-		self.equipped[1]:wep_fire(self.input["aim"])
+		self.weapon:wep_fire(self.input["aim"])
 	end
 	self.anim:update(t)
+	self.weapon.anim:update(t)
 end
 
 function Unit:draw()
-	self.anim:draw()
+	self.anim:draw(self.weapon)
 end

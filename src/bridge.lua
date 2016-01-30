@@ -36,10 +36,11 @@ function Bridge:Client(server)
 	self.CommandChannel:push(command)
 end
 
-function Bridge:Server(port)
+function Bridge:Server(port, listen)
 	local command = {
 		type = "server",
 		data = port,
+		listen = listen or false,
 	}
 	self.CommandChannel:push(command)
 end
@@ -55,5 +56,3 @@ function Bridge:CheckEvents()
 	end
 	return nil
 end
-
-return Bridge

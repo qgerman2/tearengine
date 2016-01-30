@@ -7,15 +7,38 @@ function GameServer:initialize(mapFile, Peers, Server)
 	self.Peers = Peers
 	self:spawnUnits()
 
-	self.inputBufferSize = 4
+	self.inputBufferSize = 8
 	for peerID, peer in pairs(self.Peers) do
-		--peer.Entities = {}
-		if not peer.Players then peer.Players = {} end
-		for playerID, player in pairs(peer.Players) do
-			player.tick = 0
-			player.inputBuffer = {}
-		end
+		self:onPeerJoined(peer)
 	end
+end
+
+function GameServer:onPeerJoined(peer)
+	for playerID, player in pairs(peer.Players) do
+		player.tick = 0
+		player.inputBuffer = {}
+	end
+	self:broadcastMessage({
+		[0] = MSG.PeerJoined,
+		["peerID"] = peer.id
+	})
+	print("Server: Peer " .. peer.id .. " joined the game")
+end
+
+function GameServer:onPeerLeft(peer)
+	for playerID, player in pairs(peer.Players) do
+		self.Level:removeEntity(player.unit.id)
+	end
+	self:broadcastMessage({
+		[0] = MSG.PeerLeft,
+		["peerID"] = peer.id
+	})
+	self.Peers[peer.id] = nil
+	print("Server: Peer " .. peer.id .. " left the game")
+end
+
+function GameServer:isPeerIngame(peer)
+	if not peer then return false end
 end
 
 function GameServer:broadcastMessage(msg)
@@ -26,32 +49,34 @@ end
 
 function GameServer:preTick(t)
 	for peerID, peer in pairs(self.Peers) do
-		for playerID, player in pairs(peer.Players) do
-			if #player.inputBuffer > 0 then
-				player.tick = player.inputBuffer[1].tick
-				peer.tick = player.inputBuffer[1].tick
-				player.unit:applyInput(player.inputBuffer[1])
-				player.input = player.inputBuffer[1]
-				table.remove(player.inputBuffer, 1)
-				--Send every input of every other player
-				--[+]Looks better than interpolation
-				--[-]Bandwith hungry (not really, 32~ bytes per player)
-				for destPeerID, destPeer in pairs(self.Peers) do
-					if destPeerID ~= peerID then
-						destPeer.Courier:addMessage({
-							[0] = MSG.SendInput,
-							["peerID"] = peerID,
-							["playerID"] = playerID,
-							["tick"] = self._tick,
-							["aim"] = player.input.aim,
-							["jump"] = player.input.jump,
-							["left"] = player.input.left,
-							["right"] = player.input.right,
-							["down"] = player.input.down,
-							["fire1"] = player.input.fire1,
-							["fire2"] = player.input.fire2,
-							["cancel"] = player.input.cancel
-						})
+		if peer.Players then
+			for playerID, player in pairs(peer.Players) do
+				if #player.inputBuffer > 0 then
+					player.tick = player.inputBuffer[1].tick
+					peer.tick = player.inputBuffer[1].tick
+					player.unit:applyInput(player.inputBuffer[1])
+					player.input = player.inputBuffer[1]
+					table.remove(player.inputBuffer, 1)
+					--Send every input of every other player
+					--[+]Looks better than interpolation
+					--[-]Bandwith hungry (not really, 32~ bytes per player)
+					for destPeerID, destPeer in pairs(self.Peers) do
+						if destPeerID ~= peerID then
+							destPeer.Courier:addMessage({
+								[0] = MSG.SendInput,
+								["peerID"] = peerID,
+								["playerID"] = playerID,
+								["tick"] = self._tick,
+								["aim"] = player.input.aim,
+								["jump"] = player.input.jump,
+								["left"] = player.input.left,
+								["right"] = player.input.right,
+								["down"] = player.input.down,
+								["fire1"] = player.input.fire1,
+								["fire2"] = player.input.fire2,
+								["cancel"] = player.input.cancel
+							})
+						end
 					end
 				end
 			end
@@ -88,6 +113,8 @@ function GameServer:processMessage(msg, peer)
 end
 
 function GameServer:syncEntityCreation(entity, id)
+	local x, y = entity.b2Body:getPosition()
+	local vx, vy = entity.b2Body:getLinearVelocity()
 	if entity.projectile then
 		self:broadcastMessage({
 			[0] = MSG.ProjectileFire,
@@ -95,10 +122,10 @@ function GameServer:syncEntityCreation(entity, id)
 			["peerID"] = entity.source.owner.peerID,
 			["entityID"] = id,
 			["kind"] = entity.class.name,
-			["x"] = entity.x,
-			["y"] = entity.y,
-			["vx"] = entity.vx,
-			["vy"] = entity.vy,
+			["x"] = x,
+			["y"] = y,
+			["vx"] = vx,
+			["vy"] = vy,
 		})
 	else
 		self:broadcastMessage({
@@ -106,10 +133,10 @@ function GameServer:syncEntityCreation(entity, id)
 			["tick"] = self._tick,
 			["entityID"] = id,
 			["kind"] = entity.class.name,
-			["x"] = entity.x,
-			["y"] = entity.y,
-			["vx"] = entity.vx,
-			["vy"] = entity.vy,
+			["x"] = x,
+			["y"] = y,
+			["vx"] = vx,
+			["vy"] = vy,
 		})
 	end
 	local obj = self.Vacuum:addEntity(entity)
@@ -145,10 +172,10 @@ function GameServer:sendLevelSnapshot()
 					local playerID = entity.playerID
 					local peer = entity.peer
 					local player = entity.player
-					local x, y = player.unit:getPosition()
-					local r = player.unit:getAngle()
-					local vx, vy = player.unit:getLinearVelocity()
-					local vr = player.unit:getAngularVelocity()
+					local x, y = player.unit.b2Body:getPosition()
+					local r = player.unit.b2Body:getAngle()
+					local vx, vy = player.unit.b2Body:getLinearVelocity()
+					local vr = player.unit.b2Body:getAngularVelocity()
 					if peerID == destPeerID then
 						destPeer.Courier:addMessage({
 							[0] = MSG.SyncEntityPredict,
@@ -173,10 +200,10 @@ function GameServer:sendLevelSnapshot()
 						})
 					end
 				elseif entity.class.name == "Rocket" then
-					local x, y = entity:getPosition()
-					local r = entity:getAngle()
-					local vx, vy = entity:getLinearVelocity()
-					local vr = entity:getAngularVelocity()
+					local x, y = entity.b2Body:getPosition()
+					local r = entity.b2Body:getAngle()
+					local vx, vy = entity.b2Body:getLinearVelocity()
+					local vr = entity.b2Body:getAngularVelocity()
 					if entity.b2Body:isAwake() then
 						if entity.source.owner.peerID == destPeerID then
 							destPeer.Courier:addMessage({

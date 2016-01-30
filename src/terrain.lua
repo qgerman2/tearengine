@@ -4,7 +4,8 @@ function Terrain:initialize(b2World, mapFile, debug)
 	self.debug = debug
 	self.rImage = love.image.newImageData(mapFile)
 	self.cImageChunkSize = 512
-	self.cImageChunks = self:buildImageChunks(self.cImageChunkSize)
+	self.cImageChunks = {}
+	self:buildImageChunks(self.cImageChunkSize)
 
 	self.b2World = b2World
 	self.b2Body = love.physics.newBody(b2World, 0, 0)
@@ -49,6 +50,7 @@ function Terrain:getImageContour(image)
 end
 
 function Terrain:carve(x, y, radius)
+	x, y = utils.round(x), utils.round(y)
 	for mx = x - radius, x + radius do
 		for my = y - radius, y + radius do
 			if utils.dist(x, y, mx, my) < radius then
@@ -106,7 +108,7 @@ function Terrain:buildImageChunks(size)
 			chunks[x][y].cImage = love.graphics.newImage(chunks[x][y].rImage)
 		end
 	end
-	return chunks
+	self.cImageChunks = chunks
 end
 
 function Terrain:circlePolygon(x, y, radius, precision)
